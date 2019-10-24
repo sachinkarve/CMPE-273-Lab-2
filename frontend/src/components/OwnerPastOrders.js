@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Card, Container, Col, Row, Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import URL from '../config'
+import Navbar from './Navbar';
 
 class OwnerOrderHistory extends Component {
     constructor(props) {
@@ -12,12 +13,14 @@ class OwnerOrderHistory extends Component {
 
     getCompletedOrders = () => {
         axios.defaults.headers.common['authorization']= localStorage.getItem('token')
+        console.log(`hiiiiiii`);
         axios.get(`${URL}/orders/completedorders/restaurant/${localStorage.getItem("user_id")}`)
             .then(response => {
-                if (response.data[0]) {
+                if (response.data) {
                     this.setState({
                         completed_orders: response.data
                     });
+                    console.log(response.data);
                 }
             })
             .catch(err => {
@@ -43,8 +46,8 @@ class OwnerOrderHistory extends Component {
                             <Card.Body>
                                 <Row>
                                     <Col>
-                                        <Card.Title>{order.name}</Card.Title>
-                                        <Card.Subtitle className="mb-2 text-muted">{order.address}</Card.Subtitle>
+                                        <Card.Title>{order.customer.customer_name}</Card.Title>
+                                        <Card.Subtitle className="mb-2 text-muted">{order._id}</Card.Subtitle>
                                         <Card.Subtitle className="mb-2 text-muted">{order.phone_number}</Card.Subtitle>
                                         <br />
                                         <Card.Text>{order.order_date}</Card.Text>
@@ -71,7 +74,8 @@ class OwnerOrderHistory extends Component {
             message = <Alert variant="warning">No Orders fulfilled</Alert>
         }
         return (
-            <div>
+            <div>                <Navbar /><br />
+
                 <Container className="justify-content">
                     <h3>Restaurant past orders</h3>
                     {message}

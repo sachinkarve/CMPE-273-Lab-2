@@ -42,7 +42,6 @@ class Login extends Component {
             password: this.state.password
         }
         axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
         axios.post(`${URL}/login`, data)
             .then(response => {
                 this.setState({
@@ -68,23 +67,20 @@ class Login extends Component {
 
             var decoded = jwt_decode(this.state.token.split(' ')[1]);
             localStorage.setItem("name", decoded.name);
+            localStorage.setItem("user_id", decoded._id);
             localStorage.setItem("email_id", decoded.email);
             localStorage.setItem("is_owner", decoded.is_owner);
 
             redirectVar = <Redirect to="/home" />
         }
         else if (this.state.errorFlag) {
-            invalidCredentials = (
-                <Alert variant='danger'>
-                    Invalid Credentials
-                </Alert>)
+            invalidCredentials = (<Alert variant='danger'>Invalid Credentials </Alert>)
         }
 
 
         return (
             <div>
                 {redirectVar}
-                
                     <Row>
                         <Col><img src={GrubhubCover} alt="not found"></img></Col>
                         <Col><br />
@@ -105,15 +101,12 @@ class Login extends Component {
 
                                 <Button variant="primary" type="submit">
                                     Submit
-                                </Button>
-                                
+                                </Button> 
                                 <Link to="/customersignup"><Button variant="link">Customer Signup</Button></Link>
                                 <Link to="/ownersignup"><Button variant="link">Owner Signup</Button></Link>
-
                             </Form>
                         </Col>
                     </Row>
-                
             </div>
         )
     }

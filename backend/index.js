@@ -1,6 +1,8 @@
 const app = require('./myApp');
 var pool = require('./pool');
 const home = require('./routes/home');
+const messaging = require('./routes/messaging');
+
 const login = require('./routes/login');
 const signup = require('./routes/signup');
 const profile = require('./routes/profile');
@@ -23,6 +25,7 @@ app.use("/section", section);
 app.use("/item", item);
 app.use("/login", login);
 app.use("/signup", signup);
+app.use("/messaging", messaging)
 app.use("/profile", profile);
 app.use("/imager", imager);
 
@@ -42,9 +45,9 @@ require('./passport')(passport);
 
 mongoose.connect(config.URL, { useNewUrlParser: true, useUnifiedTopology: true },(err,res)=>{
   if(err){
-    console.log(`MongoDB Connection Failed`);
+    console.log(`MongoDB Connection Failed::: ${err}`);
   }else{
-    console.log(`Mongo connected!`);
+    console.log(`Mongo connected!${res}`);
   }
 });
 

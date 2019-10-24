@@ -17,7 +17,7 @@ class Cart extends Component {
         };
         this.clearCart = this.clearCart.bind(this);
         this.removeItem = this.removeItem.bind(this);
-        this.getRestaurantDetails();
+        //this.getRestaurantDetails();
     }
 
     componentWillMount() {
@@ -25,6 +25,7 @@ class Cart extends Component {
         let cartItems = [];
         if (localStorage.getItem("cart_items")) {
             cartItems.push(...JSON.parse(localStorage.getItem("cart_items")));
+            console.log(cartItems);
             this.setState({
                 cart_items: cartItems
             });
@@ -32,29 +33,8 @@ class Cart extends Component {
 
     };
 
-    getRestaurantDetails = () => {
-        let res_id;
-        if (localStorage.getItem("cart_res_id")) {
-            res_id = localStorage.getItem("cart_res_id");
-            axios.defaults.headers.common['authorization']= localStorage.getItem('token') 
-            axios.get(`${URL}/restaurant/${res_id}`)
-                .then(response => {
-                    if (response.data) {
-                        this.setState({
-                            restaurant: response.data,
-                        });
-                    }
-                })
-                .catch(error => {
-                    if (error.response && error.response.data) {
-                        console.log(error.response.data);
-                    }
-                })
-        }
-    };
-
     onQuantityChange = (e) => {
-        let item_id = parseInt(e.target.name);
+        let item_id = e.target.name;
         let newQuantity = parseInt(e.target.value);
         let cart_items = this.state.cart_items;
         let index = cart_items.findIndex((cart_item => cart_item.item_id === item_id));
@@ -66,7 +46,7 @@ class Cart extends Component {
     };
 
     removeItem = (e) => {
-        let item_id = parseInt(e.target.name);
+        let item_id = e.target.name;
         let cart_items = this.state.cart_items;
         let items = [];
         let index = cart_items.findIndex((cart_item => cart_item.item_id === item_id));
@@ -109,18 +89,15 @@ class Cart extends Component {
             restaurantDetails = null,
             discountAmount = null;
 
+            resName = localStorage.getItem("cart_res_name");
+
+
         let discount = 0,
             delivery = 6,
             tax = 0;
 
         if (!localStorage.getItem("user_id") || localStorage.getItem("is_owner") === "1") {
             redirectVar = <Redirect to="/" />
-        }
-
-        if (this.state && this.state.restaurant) {
-            resName = this.state.restaurant.res_name;
-            resAddress = this.state.restaurant.address;
-            resZIP = this.state.restaurant.res_zip_code;
         }
 
         if (this.state && this.state.cart_items.length === 0) {
@@ -133,8 +110,7 @@ class Cart extends Component {
             restaurantDetails = (
                 <Card bg="info" style={{ width: "50rem", margin: "2%" }}>
                     <ListGroup className="list-group-flush">
-                        <ListGroupItem><h3>{resName}</h3></ListGroupItem>
-                        <ListGroupItem>{resAddress} | {resZIP}</ListGroupItem>
+                        <ListGroupItem><center><h3>{resName}</h3></center></ListGroupItem>
                     </ListGroup>
                 </Card>
             );

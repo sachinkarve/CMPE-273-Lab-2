@@ -2,14 +2,16 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router';
 import Navbar from './Navbar';
 import axios from 'axios';
-import { Card, Container, Col, Row, Button, Alert } from "react-bootstrap";
+import { Card, Container, Col, Row, Modal, Button, Alert } from "react-bootstrap";
 import { BrowserRouter, Link } from "react-router-dom";
 import URL from '../config'
+import MessageModal from './MessageModal'
+
 class CustomerPresentOrders extends Component {
     constructor(props) {
         super(props);
         this.setState({
-            pending_orders: []
+            pending_orders: [],
         });
 
         this.cancelOrder = this.cancelOrder.bind(this);
@@ -20,21 +22,26 @@ class CustomerPresentOrders extends Component {
         document.title = "Your Orders";
     }
 
+
     cancelOrder = (e) => {
         let pending_orders = this.state.pending_orders;
         let data = {
-            order_id: parseInt(e.target.name)
+            order_id: e.target.name
         };
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
+        console.log(`****----data----****`);
+        console.log(data);
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
         axios.post(`${URL}/orders/cancelorder`, data)
             .then(response => {
                 if (response.data === "ORDER_CANCELLED") {
-                    let index = pending_orders.findIndex(order => order.order_id === data.order_id);
+                    let index = pending_orders.findIndex(order => order._id === data.order_id);
                     pending_orders.splice(index, 1);
                     this.setState({
                         pending_orders: pending_orders,
                         message: response.data
                     });
+                    this.getPendingOrders();
+
                 }
             })
             .catch(error => {
@@ -44,15 +51,19 @@ class CustomerPresentOrders extends Component {
             });
     };
 
-    getPendingOrders = () => {
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token') 
 
-        axios.get(`${URL}/orders/pendingorders/localStorage.getItem("user_id")`)
+
+    getPendingOrders = () => {
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
+
+        axios.get(`${URL}/orders/pendingorders/${localStorage.getItem("user_id")}`)
             .then(response => {
-                if (response.data[0]) {
+                if (response.data) {
                     this.setState({
                         pending_orders: response.data
                     });
+                    console.log(`****----response.data--*******`);
+                    console.log(response.data);
                 }
             })
             .catch(err => {
@@ -69,6 +80,8 @@ class CustomerPresentOrders extends Component {
         let orders = [];
         let orderCards = null;
         let message = null;
+
+
         if (!localStorage.getItem("user_id") || localStorage.getItem("is_owner") === "1") {
             redirectVar = <Redirect to="/" />
         }
@@ -94,21 +107,25 @@ class CustomerPresentOrders extends Component {
                             <Card.Body>
                                 <Row>
                                     <Col>
-                                        <Card.Title>{order.res_name}</Card.Title>
-                                        <Card.Subtitle className="mb-2 text-muted">{order.res_address} | {order.res_zip_code}</Card.Subtitle>
+                                        <Card.Title>{order.restaurant.res_name}</Card.Title>
+                                        <Card.Subtitle className="mb-2 text-muted">{order.total}</Card.Subtitle>
+                                        <Card.Text>{order._id}</Card.Text>
+
                                         <Row>
-                                            <Link to={{ pathname: "/orders/details", state: {order_details: order, prevPath: "/orders"} }}>
-                                                <Button variant="link">Order Details</Button>
-                                            </Link>
+
                                         </Row>
                                     </Col>
                                     <Col align="center">
                                         <Card.Text>{order.order_status}</Card.Text>
                                         <Card.Text>{order.order_date}</Card.Text>
                                     </Col>
-                                    <Col align="right">
-                                        <Button variant="secondary" name={order.order_id} onClick={this.cancelOrder}>Cancel Order</Button>&nbsp;
-                                </Col>
+                                    <Col align="center">
+                                        <Button variant="secondary" name={order._id} onClick={this.cancelOrder}>Cancel Order</Button>&nbsp;
+                                        <br />
+                                        <br />
+                                        <MessageModal order={order} />
+                                    </Col>
+
                                 </Row>
                             </Card.Body>
                         </Card>

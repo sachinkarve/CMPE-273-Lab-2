@@ -2,21 +2,21 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router';
 import axios from 'axios';
 import ItemCard from "./ItemCard"
-import { Button, Card,Container, Col, Row } from 'react-bootstrap';
-import Navbar from './Navbar';
+import { Button, Card, Container, Col, Row, Pagination } from 'react-bootstrap';
+import Navbar from './Navbar.js';
+import resImageSrc_placeholder from '../images/restaurant_placeholder.jpg'
 import URL from '../config'
-import resImageSrc_placeholder from '../images/restaurant_placeholder.jpg'
 
 class Restaurant extends Component {
     constructor(props) {
         super(props);
         this.setState({
             menu_sections: [],
-            menu_items: []
+            activePage: 1
         });
         this.sectionItems = this.sectionItems.bind(this);
+        this.changePage = this.changePage.bind(this);
         this.getSections();
-        this.getMenuItems();
     }
 
     componentWillMount() {
@@ -26,38 +26,22 @@ class Restaurant extends Component {
     }
 
     getSections = () => {
+        console.log(`%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%`);
         if (this.props.location.state) {
-          axios.defaults.headers.common['authorization']= localStorage.getItem('token')
-            axios.get(`${URL}/menu/sections/${this.props.location.state.owner_user_id}`)
+            axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+            console.log(`@@@@@@@@@@@@@@@@`);
+            console.log(this.props.location.state.user_ref);
+            axios.get(`${URL}/menu/sections/${this.props.location.state.user_ref}`)
                 .then(response => {
-                    if (response.data[0]) {
+                    if (response.data) {
                         this.setState({
                             menu_sections: response.data
                         });
                     }
                 })
                 .catch(err => {
-                    if (err.response && err.response.data) {
-                        console.log(err.response.data);
-                    }
-                });
-        }
-    };
-
-    getMenuItems = () => {
-        if (this.props.location.state) {
-            axios.defaults.headers.common['authorization']= localStorage.getItem('token')
-            axios.get(`${URL}/menu/items/${this.props.location.state.owner_user_id}`)
-                .then(response => {
-                    if (response.data[0]) {
-                        this.setState({
-                            menu_items: response.data
-                        });
-                    }
-                })
-                .catch(err => {
-                    if (err.response && err.response.data) {
-                        console.log(err.response.data);
+                    if (err) {
+                        console.log(err);
                     }
                 });
         }
@@ -66,19 +50,30 @@ class Restaurant extends Component {
     sectionItems = (menu_section) => {
         var itemsRender = [], items, item, section;
 
-
-        if (this.state && this.state.menu_items && this.state.menu_items.length > 0) {
-            items = this.state.menu_items.filter(menu_item => menu_item.menu_section_id === menu_section.menu_section_id);
-            if (items.length > 0) {
-                section = <h4>{menu_section.menu_section_name}</h4>;
-                itemsRender.push(section);
-                for (var i = 0; i < items.length; i++) {
-                    item = <ItemCard menu_item={items[i]} />;
-                    itemsRender.push(item);
-                }
+        items = menu_section.menu_item;
+        if (items.length > 0) {
+            section = <h4>{menu_section.menu_section_name}</h4>;
+            itemsRender.push(section);
+            for (var i = 0; i < items.length; i++) {
+                item = <ItemCard menu_item={items[i]} res_id={this.props.location.state._id} res_name={this.props.location.state.res_name}/>;
+                itemsRender.push(item);
             }
-            return itemsRender;
         }
+        return itemsRender;
+    };
+
+    changePage = (e) => {
+        let page = this.state.activePage;
+        if (e.target.text === ">" && page !== parseInt(e.target.name)) {
+            page += 1;
+        } else if (e.target.text === "<" && page !== parseInt(e.target.name)) {
+            page -= 1;
+        } else {
+            page = parseInt(e.target.name);
+        }
+        this.setState({
+            activePage: page
+        });
     };
 
     render() {
@@ -86,6 +81,9 @@ class Restaurant extends Component {
             section = null,
             renderOutput = [],
             resImageSrc = null,
+            active = 1,
+            itemsToShow = 1,
+            pagesBar = null,
             resName, resPhone, resAddress, resCuisine, resZIP,
             restaurant = this.props.location.state;
 
@@ -93,36 +91,62 @@ class Restaurant extends Component {
             redirectVar = <Redirect to="/home" />
         }
 
+        if (this.state && this.state.activePage) {
+            active = this.state.activePage;
+        }
+
         if (restaurant) {
-            resImageSrc = `${URL}/fetchimages/restaurant/restaurant.res_image`;
+            resImageSrc = resImageSrc_placeholder;
             resName = restaurant.res_name;
-            resAddress = restaurant.res_address;
             resZIP = restaurant.res_zip_code;
-            resAddress = restaurant.address;
-            resPhone = restaurant.phone_number;
+            resAddress = restaurant.res_address;
+            resPhone = restaurant.res_phone_number;
             resCuisine = restaurant.res_cuisine;
         }
         if (this.state && this.state.menu_sections && this.state.menu_sections.length > 0) {
-            for (var i = 0; i < this.state.menu_sections.length; i++) {
+            let menu_sections = this.state.menu_sections.filter(menu_section => menu_section.menu_item.length);
+            let sectionCount = 0;
+            for (var i = (active - 1) * itemsToShow; i < menu_sections.length; i++) {
                 section = this.sectionItems(this.state.menu_sections[i]);
                 renderOutput.push(section);
+                if (++sectionCount === itemsToShow)
+                    break;
             }
+
+            let pages = [];
+            let pageCount = Math.ceil(menu_sections.length / itemsToShow);
+
+            for (let i = 1; i <= pageCount; i++) {
+                pages.push(
+                    <Pagination.Item active={i === active} name={i} key={i} onClick={this.changePage}>
+                        {i}
+                    </Pagination.Item>
+                );
+            }
+            pagesBar = (
+                <div>
+                    <Pagination>
+                        <Pagination.Prev name="1" onClick={this.changePage} />
+                        {pages}
+                        <Pagination.Next name={pageCount} onClick={this.changePage} />
+                    </Pagination>
+                </div>
+            );
         }
         return (
             <div>
                 {redirectVar}
                 <Navbar />
 
-                <Card bg="light" text="dark" style={{ width: "70rem", height: "15rem", margin: "8%" }}>
+                <Card bg="light" text="dark" style={{ width: "90rem", height: "15rem", margin: "2%" }}>
                     <Row>
                         <Col>
-                            <Card.Img style={{ width: "18rem", height: "15rem" }} src={resImageSrc_placeholder} />
-                            {/* resImageSrc */}
+                            <Card.Img style={{ width: "18rem", height: "15rem" }} src={resImageSrc} />
                         </Col>
                         <Card.Body>
                             <Card.Title><h1>{resName}</h1></Card.Title>
                             <br />
-                            <Card.Text><h4>{resAddress} | {resZIP} | {resPhone}</h4></Card.Text>
+                            <Card.Text><h4> {resZIP}</h4></Card.Text>
                             <br />
                             <Card.Text><h4>Cuisine: {resCuisine}</h4></Card.Text>
                         </Card.Body>
@@ -131,11 +155,15 @@ class Restaurant extends Component {
                 <Container>
                     {renderOutput}
                 </Container>
+                <Row>
+                    <Col sm={5}></Col>
+                    <Col>{pagesBar}</Col>
+                </Row>
                 <center>
                     <Button href="/home">Home</Button>&nbsp;&nbsp;
                     <Button variant="success" name="goToCart" href="/cart">Go To Cart</Button>
                 </center>
-                <br/>
+                <br />
             </div>
         )
     }

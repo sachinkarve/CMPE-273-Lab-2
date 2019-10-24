@@ -12,7 +12,7 @@ class Profile extends Component {
         let redirectvar = null;
         let profileRender = null;
         if (localStorage.getItem('token')) {
-            if (localStorage.getItem("is_owner") === "1") {
+            if (localStorage.getItem("is_owner") === "true") {
                 profileRender = <OwnerProfile />
             }
             else {

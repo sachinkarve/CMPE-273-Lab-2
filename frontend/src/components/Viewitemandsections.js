@@ -20,8 +20,8 @@ class Viewitemandsections extends Component {
             allItems: [],
             itemError: false,
         }
-        this.getSections();
-        this.getItems();
+        this.fetchSections();
+        // this.getItems();
 
     }
 
@@ -29,7 +29,9 @@ class Viewitemandsections extends Component {
     itemFetcher(menu_section) {
         let existingItem = [];
         let secItems = [];
-
+        console.log(`***---inside itemFetcher----****`);
+        console.log(`***--- Menu_section----****`);
+        console.log(menu_section);
         let sectionVar = (<Card style={{ height: '5rem', width: '25rem' }}>
             <Card.Body>
                 <Card.Text>
@@ -39,16 +41,16 @@ class Viewitemandsections extends Component {
         </Card>)
 
         existingItem.push(sectionVar);
-        secItems = this.state.allItems.filter(item => item.menu_section_id === menu_section.menu_section_id);
+        secItems = this.state.allItems.filter(item => item.sec_ref === menu_section._id);
         secItems = secItems.map(item =>
             (
                 <Card style={{ height: '18rem', width: '20rem' }}>
                     <Card.Img variant="top" style={{ height: '10rem', width: '20rem' }} src={item_placeholder} />
                     <Card.Body>
                         <Card.Text>
-                            <h8>{item.item_name}</h8><br />
-                            <h8>{item.item_price}</h8><br />
-                            <h8>{item.item_description}</h8><br />
+                            <h8>{item.itemName}</h8><br />
+                            <h8>{item.itemPrice}</h8><br />
+                            <h8>{item.itemDescription}</h8><br />
                         </Card.Text>
                     </Card.Body>
                 </Card>
@@ -75,50 +77,59 @@ class Viewitemandsections extends Component {
     }
 
 
-    getSections = () => {
-        console.log(`inside getSections`);
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
-        axios.get(`${URL}/section/getallsections/${this.state.user_id}`)
+    fetchSections = () => {
+        axios
+            .get(`${URL}/section/${localStorage.getItem("user_id")}`)
             .then(response => {
-                this.setState({
-                    allSections: response.data
-                })
-                console.log(`below is allsections from state`);
-                console.log(this.state.allSections);
+                if (response.status === 200) {
+                    console.log(`******-----response.data------**********`);
 
+                    console.log(response.data);
+                    this.setState({
+                        allSections: response.data
+                    });
+
+                    var fetched_items = [];
+                    response.data.map(section => {
+                        fetched_items.push(...section.menu_item);
+                    })
+                    this.setState({
+                        allItems: fetched_items
+                    });
+                    console.log(`******-----fetchedItems saved------**********`);
+                    console.log(fetched_items);
+                }
             })
             .catch(err => {
-                console.log(`error occured:: ${err}`);
-                this.setState({
-                    sectionsError: true
-                })
+                if (err) {
+                    console.log(err);
+                }
             });
-        console.log(`finished getSections`);
-    }
+    };
 
 
-    getItems = () => {
-        console.log(`inside getItems`);
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
-        axios.get(`${URL}/item/getallitems/${this.state.user_id}`)
-            .then(response => {
-                this.setState({
-                    allItems: response.data
-                })
-                console.log(`below is allItems from state`);
-                console.log(this.state.allItems);
-            })
-            .catch(err => {
-                console.log(`error occured:: ${err}`);
-                this.setState({
-                    itemError: true
-                })
-            });
-        console.log(`finished getItems`);
 
-    }
+    // getItems = () => {
+    //     // console.log(`inside getItems`);
+    //     // axios.defaults.withCredentials = true;
+    //     // axios.defaults.headers.common['authorization']= localStorage.getItem('token')
+    //     // axios.get(`${URL}/item/getallitems/${this.state.user_id}`)
+    //     //     .then(response => {
+    //     //         this.setState({
+    //     //             allItems: response.data
+    //     //         })
+    //     //         console.log(`below is allItems from state`);
+    //     //         console.log(this.state.allItems);
+    //     //     })
+    //     //     .catch(err => {
+    //     //         console.log(`error occured:: ${err}`);
+    //     //         this.setState({
+    //     //             itemError: true
+    //     //         })
+    //     //     });
+    //     // console.log(`finished getItems`);
+
+    // }
 
 
 

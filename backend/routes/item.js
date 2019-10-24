@@ -2,100 +2,105 @@ const express = require('express')
 const router = express.Router();
 const pool = require('../pool')
 const passwordHash = require('password-hash');
+const userModel = require('../db_Schema/user')
 
 
 
 //this shows the user profile
 router.post('/additem', (req, res) => {
-  let sql = `CALL Insert_item('${req.body.itemName}','${req.body.itemDescription}',${req.body.itemPrice},'${req.body.menu_section_name}', ${req.body.user_id})`;
-  console.log(sql);
-  pool.query(sql, (err, result) => {
+  console.log(`*****----req.body-----****`);
+  console.log(req.body);
+let itemObject = {
+  itemName: req.body.itemName,
+  itemDescription: req.body.itemDescription,
+  itemPrice: req.body.itemPrice,
+  sec_ref: req.body.menu_section_id,
+}
+  userModel.findById(req.body.user_id, (err, fetchedUser) => {
     if (err) {
-      res.writeHead(500, {
-        'Content-Type': 'text/plain'
-      });
-      console.log(err);
-      res.end("Error in Data");
-    }
-    if (result && result.length > 0 && result[0][0]) {
-      res.writeHead(200, {
-        'Content-Type': 'text/plain'
-      });
-      res.end(JSON.stringify(result[0]));
+      return res.status(500).send("ITEM_ADDITION_FAILED");
+    } else if (fetchedUser) {
+      console.log(`*****----fetcheduser-----****`); console.log(fetchedUser);
+      let section = fetchedUser.restaurant.menu_sections.id(req.body.menu_section_id);
+      if (!section) {
+        res.status(500).send("SECTION_NOT_FOUND");
+      } else {
+        let itemFlag;
+        section.menu_item.map(item => {
+          if (item.itemName === req.body.itemName) {
+            itemFlag = true;
+          }
+        })
+        if (!itemFlag) {
+          console.log(`*****----section-----****`); console.log(section);
+          section.menu_item.push(itemObject);
+          fetchedUser.save((err, dbres) => {
+            if (err) {
+              res.status(500).send("ITEM_ADDITION_FAILED");
+            } else {
+              console.log(`*****-----dbres----****`);
+              console.log(dbres);
+              res.status(200).send("ITEM_ADDED")
+            }
+          })
+        }
+        else {
+          res.status(200).send("ITEM_EXISTS");
+        }
+      }
     }
   });
-  console.log(`Item Added`);
 });
 
 
+router.get('/getallitems/:user_id', (req, res) => {
+  
 
-router.get('/getallitems/:user_id',(req,res)=>{
-  let sql = `CALL Get_all_items(NULL, ${req.params.user_id})`;
-  console.log(sql);
-  pool.query(sql, (err,result)=>{
-    if(err){
-      res.writeHead(500, {
-        'Content-Type': 'text/plain'
-      });
-      res.end("DB_ERROR");
 
-    }
-    if(result && result.length>0){
-      console.log(result);
-      res.writeHead(200, {
-        'Content-Type': 'text/plain'
-      });
-      res.end(JSON.stringify(result[0]));
 
-    }else{
-      console.log(`inside else in backend`);
-      console.log(result);
-      res.writeHead(500, {
-        'Content-Type': 'text/plain'
-      });
-      res.end("NO_ITEM_FOUND");
-    }
-  })
 });
-
-
 
 
 
 router.post('/update', (req, res) => {
-
-  let sql = `UPDATE menu_items SET item_name = '${req.body.newItemName}', item_description= '${req.body.newItemDescription}',item_price = 
-  ${req.body.newItemPrice} WHERE item_id = ${req.body.item_id}`;
-  console.log(sql);
-  pool.query(sql, (err, result) => {
+console.log(`***---Request Body-----***`);
+console.log(req.body);
+  userModel.findById(req.body.user_id, (err, fetchedUser) => {
     if (err) {
-      res.writeHead(500, {
-        'Content-Type': 'text/plain'
-      });
-      console.log(err);
-      res.end("SOMETHING_WENT_WRONG");
-    }
-    if (result) {
-      res.writeHead(200, {
-        'Content-Type': 'text/plain'
-      });
-      res.end("UPDATE_SUCCESSFULL");
-    }
+      return res.status(200).send("SOMETHING_WENT_WRONG");
+    } else if (fetchedUser) {
+        section = fetchedUser.restaurant.menu_sections.id(req.body.sec_id);
+        if(!section){
+          res.status(500).send("SECTION_NOT_FOUND");
+        }else{
+          let itemExists =section.menu_item.filter(item=>{
+            item.itemName === req.body.newItemName
+          })
+          if(!itemExists){
 
+            item = section.menu_item.id(req.body.item_id)
+            if(item){
+              item.itemName = req.body.newItemName;
+              item.itemDescription = req.body.newItemDescription;
+              item.itemPrice = req.body.newItemPrice;
+  
+              fetchedUser.save((err,dbres)=>{
+                if(err){
+                  console.log('SOMETHING_WENT_WRONG');
+                  res.status(200).send('SOMETHING_WENT_WRONG')
+                }else{
+                  console.log('UPDATE_SUCCESSFULL');
+                  res.status(200).send('UPDATE_SUCCESSFULL')
+                }
+              })
+            }
+          }else{
+            res.status(200).send('ITEM_EXISTS')
+          }
+        }
+      }
+    });
   });
-  console.log(`Update Successful`);
-});
-
-
-
-
-
-
-
-
-
-
-
 
 
 //this shows the user profile
@@ -156,32 +161,74 @@ router.get('/edititem/:item_name', (req, res) => {
 });
 
 
-
-
-
-
-
 //this shows the user profile
 router.post('/deleteitem', (req, res) => {
-  console.log(req.body);
-  let sql = `CALL delete_item('${req.body.item_name}')`;
-  console.log(sql);
-  pool.query(sql, (err, result) => {
-    if (err) {
-      res.writeHead(500, {
-        'Content-Type': 'text/plain'
-      });
-      res.end("Error in Data");
-    }
-    if (result && result.length > 0 && result[0][0]) {
-      res.writeHead(200, {
-        'Content-Type': 'text/plain'
-      });
-      res.end(JSON.stringify(result[0]));
-    }
-  });
-  console.log(`Item deleted`);
-});
 
+  userModel.findById(req.body.user_id, (err, fetchedUser) => {
+    if (err) {
+      return res.status(200).send("SOMETHING_WENT_WRONG");
+    } else if (fetchedUser) {
+        section = fetchedUser.restaurant.menu_sections.id(req.body.sec_id);
+        console.log(`**---section----**`);
+        console.log(section);
+        item = section.menu_item.id(req.body.item_id);
+        console.log(`**---item----**`);
+        console.log(item);
+        item.remove();
+        fetchedUser.save((err,dbres)=>{
+          if (err) {
+            console.log(err);
+            console.log("DELETION_FAILED");
+            res.status(200).send('DELETION_FAILED')
+
+          } else {
+            console.log(`***-------item_added-------***`)
+            res.status(200).send("ITEM_DELETED_SUCCESSFULLY")
+            console.log("ITEM_DELETED");
+          }
+        })
+
+
+
+
+
+
+
+      // index = fetchedUser.restaurant.menu_sections.findIndex(sec => sec.menu_section_name === req.body.menu_section_name)
+      // if (index > -1) {
+      //   exists = fetchedUser.restaurant.menu_sections[index].menu_item.findIndex(item => item.itemName === req.body.itemName)
+      //   console.log(`----exists----`);
+      //   console.log(exists);
+      //   if (exists < 0) {
+      //     console.log(`***-------item doesnt exists, can be added-------***`);
+      //     console.log(exists);
+      //     fetchedUser.restaurant.menu_sections[index].menu_item.push(newItem);
+      //     console.log(fetchedUser.restaurant.menu_sections);
+      //     fetchedUser.save((err, status) => {
+      //       if (err) {
+      //         console.log((`***------errrrorororororo____***`));
+      //         console.log(err);
+      //         res.status(500)
+
+      //       } else {
+      //         console.log(`***-------item_added-------***`)
+      //         res.status(200).send("ITEM_ADDED")
+      //       }
+      //     })
+      //   } else {
+      //     console.log(`***-------item_exists-------***`);
+      //     res.status(200).send("ITEM_EXISTS")
+      //   }
+      // } else {
+      //   console.log(`***-------SECTION_DOES_NOT_EXIST-------***`);
+
+      //   res.status(200).send("SECTION_DOES_NOT_EXIST")
+      // }
+    }
+
+
+
+  });
+});
 
 module.exports = router;

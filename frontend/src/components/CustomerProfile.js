@@ -28,12 +28,12 @@ class CustomerProfile extends Component {
         axios.post(`${URL}/profile/userget`, data)
             .then(response => {
                 this.setState({
-                    user_id: response.data[0].user_id,
-                    name: response.data[0].name,
-                    email_id: response.data[0].email_id,
-                    user_image: response.data[0].user_image,
-                    address: response.data[0].address,
-                    phone_number: response.data[0].phone_number
+                    user_id: response.data.user_id,
+                    name: response.data.name,
+                    email_id: response.data.email,
+                    user_image: response.data.user_image,
+                    address: response.data.address,
+                    phone_number: response.data.phone_number
                 });
             })
             .catch(error => {
@@ -57,6 +57,7 @@ class CustomerProfile extends Component {
             phone_number: this.state.phone_number
         };
         axios.defaults.headers.common['authorization']= localStorage.getItem('token')
+        console.log(data);
         axios.post(`${URL}/profile/customerupdate`, data)
             .then(response => {
                 this.setState({

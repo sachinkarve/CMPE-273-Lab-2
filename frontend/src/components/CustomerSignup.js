@@ -65,16 +65,12 @@ class CustomerSignup extends Component {
             redirectVar = <Redirect to="/login" />
         }
         else if(this.state.authFlag === false){
-            invalidCredentials = (
-                <Alert variant='danger'>
-                    Invalid Credentials or user exists!
-                </Alert>)
+            invalidCredentials = ( <Alert variant='danger'>  Invalid Credentials or user exists!  </Alert>)
         }
         return (
             <div>
             {redirectVar}
-
-                
+ 
                     <Row>
                         <Col><img src={GrubhubCover} alt="not found"></img></Col>
                         <Col><br />

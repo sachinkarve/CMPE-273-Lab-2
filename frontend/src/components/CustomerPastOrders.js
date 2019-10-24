@@ -8,7 +8,6 @@ import URL from '../config'
 class CustomerPastOrders extends Component {
     constructor(props) {
         super(props);
-
         this.getCompletedOrders();
     }
 
@@ -17,10 +16,11 @@ class CustomerPastOrders extends Component {
 
         axios.get(`${URL}/orders/completedorders/${localStorage.getItem("user_id")}`)
             .then(response => {
-                if (response.data[0]) {
+                if (response.data) {
                     this.setState({
                         completed_orders: response.data
                     });
+                    console.log(response.data);
                 }
             })
             .catch(err => {
@@ -46,8 +46,8 @@ class CustomerPastOrders extends Component {
                             <Card.Body>
                                 <Row>
                                     <Col>
-                                        <Card.Title>{order.res_name}</Card.Title>
-                                        <Card.Subtitle className="mb-2 text-muted">{order.res_address} | {order.res_zip_code}</Card.Subtitle>
+                                        <Card.Title>{order.restaurant.res_name}</Card.Title>
+                                        <Card.Subtitle className="mb-2 text-muted">{order._id}</Card.Subtitle>
                                         <Card.Text>{order.order_date}</Card.Text>
                                     </Col>
                                     <Col align="center">

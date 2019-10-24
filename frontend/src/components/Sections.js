@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import Navbar from './Navbar.js'
 import URL from '../config'
 
-import { Row, Alert, Card, Container, Button, Col } from 'react-bootstrap';
+import { Row, Dropdown,ListGroup, Alert, Card, Container, Button, Col } from 'react-bootstrap';
 
 class Sections extends Component {
     constructor(props) {
@@ -18,42 +18,60 @@ class Sections extends Component {
             deleteResponseMsg: "",
             editSectionName: "",
             editGetStatus: "",
-            updatePostStatus : "",
+            updatePostStatus: "",
             dynamic_menu_section_name: "",
             dynamic_menu_section_id: "",
-            updateFlag: null
+            fetched_menu_sections: [],
+            menu_section_name_to_update: "",
+            menu_section_id_to_update: "",
+
         }
         this.onChangeHandler = this.onChangeHandler.bind(this);
         this.onAddSubmit = this.onAddSubmit.bind(this);
         this.onDeleteSubmit = this.onDeleteSubmit.bind(this);
-        this.onEditGet = this.onEditGet.bind(this);
+        this.handleSelection = this.handleSelection.bind(this);
+        this.fetchSections = this.fetchSections.bind(this);
+
+        this.fetchSections();
+
     }
-
-    onEditGet = (e) => {
-        console.log(`inside onEditSubmit`);
+    //sun
+    componentWillMount() {
+        this.fetchSections();
+    }
+    handleSelection = e => {
         e.preventDefault();
+        let section_name = e.target.name;
+        let section_details = this.state.fetched_menu_sections.filter(
+            section => section.menu_section_name === section_name
+        );
+        console.log({ section_details });
+        this.setState({
+            menu_section_name_to_update: section_details[0].menu_section_name,
+            menu_section_id_to_update: section_details[0]._id
+        });
+    };
+    //handle section selection
 
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
-        axios.get(`${URL}/section/editsection/${this.state.editSectionName}`)
+    //Fetch Sections
+    fetchSections = () => {
+        axios
+            .get(`${URL}/section/${localStorage.getItem("user_id")}`)
             .then(response => {
-                console.log(response);
-                this.setState({
-                    dynamic_menu_section_name: response.data.menu_section_name,
-                    dynamic_menu_section_id: response.data.menu_section_id,
-                    updateFlag: true,
-                    editGetStatus: "SUCCESS"
-                })
-
+                if (response.status === 200) {
+                    console.log(response.data);
+                    this.setState({
+                        fetched_menu_sections: response.data
+                    });
+                    console.log(`fetched menu section`);
+                }
             })
             .catch(err => {
-                console.log(`error occured:: ${err}`);
-                this.setState({
-                    editGetStatus: "NO_ITEM_FOUND"
-                })
+                if (err.response && err.response.data) {
+                    console.log(err.response.data);
+                }
             });
-    }
-
+    };
 
     onUpdateSubmit = (e) => {
         console.log(`inside onUpdateSubmit`);
@@ -61,25 +79,26 @@ class Sections extends Component {
         axios.defaults.withCredentials = true;
         const data = {
             dynamic_menu_section_name: this.state.dynamic_menu_section_name,
-            dynamic_menu_section_id: this.state.dynamic_menu_section_id
+            section_id: this.state.menu_section_id_to_update,
+            user_id: localStorage.getItem("user_id")
         }
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
         axios.post(`${URL}/section/editsection`, data)
             .then(response => {
                 console.log(response);
+                this.fetchSections();
+
                 this.setState({
-                    updatePostStatus : "UPDATE_SUCCESSFUL"
+                    updatePostStatus: "UPDATE_SUCCESSFUL"
                 })
             })
             .catch(err => {
                 console.log(`error occured:: ${err}`);
                 this.setState({
-                    updatePostStatus : "FAILED"
+                    updatePostStatus: "FAILED"
                 })
             });
     }
-
-
 
     onChangeHandler = (e) => {
         this.setState({
@@ -87,84 +106,75 @@ class Sections extends Component {
         });
     }
 
-
-    onChangeHandlerForEdit = (e) => {
-        this.setState({
-            [e.target.name]: e.target.value,
-            updateFlag: null
-        });
-
-    }
-
-
     onAddSubmit = (e) => {
         //prevent page from refresh
-        console.log(`inside add Sections ka submit`)
+        console.log(`add section`)
         e.preventDefault();
         const data = {
             sectionName: this.state.addSectionName,
             user_id: this.state.user_id
         }
         axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
         axios.post(`${URL}/section/addsection`, data)
             .then(response => {
-                console.log("Response String : ", response.data[0].status);
-                if (response.data[0].status === "SECTION_ADDED") {
+                console.log(response.data);
+                if (response.data === "SECTION_ADDED") {
                     this.setState({
                         addResponseMsg: "SECTION_ADDED"
                     })
-                } else if (response.data[0].status === "SECTION_EXISTS") {
+                    this.fetchSections();
+                } else if (response.data === "SECTION_EXISTS") {
                     this.setState({
                         addResponseMsg: "SECTION_EXISTS"
                     })
                 }
             }).catch(err => {
-                console.log("Response String : ", err);
-                if (err.status === "SECTION_ADDITION_FAILED") {
-                    this.setState({
-                        addResponseMsg: "SECTION_ADDITION_FAILED"
-                    })
-                }
+                console.log(err);
+
+                this.setState({
+                    addResponseMsg: "SECTION_ADDITION_FAILED"
+                })
             });
     }
-
 
     onDeleteSubmit = (e) => {
         //prevent page from refresh
         console.log(`inside delete Sections ka submit`)
         e.preventDefault();
         const data = {
-            menu_section_name: this.state.deleteSectionName
+            menu_section_id: e.target.name,
+            user_id: this.state.user_id
         }
         axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
         axios.post(`${URL}/section/deletesection`, data)
             .then(response => {
-                console.log("Response String : ", response.data[0].status);
-                if (response.data[0].status === "SECTION_DELETED_SUCCESSFULLY") {
+                console.log(response.data);
+                if (response.data === "SUCCESS") {
                     this.setState({
                         deleteResponseMsg: "SECTION_DELETED_SUCCESSFULLY"
                     })
+                    this.fetchSections();
+
                 }
-                else if (response.data[0].status === "SECTION_DOES_NOT_EXIST") {
+                else if (response.data === "SECTION_DOES_NOT_EXISTS") {
                     this.setState({
                         deleteResponseMsg: "SECTION_DOES_NOT_EXIST"
                     })
                 }
             }).catch(err => {
-                console.log("Response String : ", err);
                 this.setState({
                     deleteResponseMsg: "DELETION_FAILED"
                 })
             });
     }
 
-
     render() {
         let popupMsg = null;
         let editGetpopupMsg = null;
         let updateComponent = null;
+        let DisplaySectionsForDelete = null
         let updateStatuspopupMsg = null;
         switch (this.state.addResponseMsg) {
             case "SECTION_ADDED":
@@ -223,35 +233,41 @@ class Sections extends Component {
             redirectvar = <Redirect to="/login" />
         }
 
-        if (this.state.updateFlag) {
-            updateComponent = (
+        DisplaySectionsForDelete = this.state.fetched_menu_sections.map(section => {
+            return (
                 <div>
-                    <Card style={{ width: '24rem' }}>
-                        <Card.Body>
-                            <Card.Title>Update Section</Card.Title>
-                            <Card.Text>
-                                <form onSubmit={this.onUpdateSubmit}>
-                                    <div class="form-group">
-                                        <label for="exampleInputEmail1">Section name</label>
-                                        <input type="text"
-                                            class="form-control"
-                                            onChange={this.onChangeHandler}
-                                            name="dynamic_menu_section_name"
-                                            required={true}
-                                            placeholder="Add new Sections here.."
-                                            defaultValue={this.state.dynamic_menu_section_name}
-                                        />
-                                    </div>
-                                    {updateStatuspopupMsg}
-                                    <button type="submit" class="btn btn-primary">Update</button>
-                                </form>
-                            </Card.Text>
-                        </Card.Body>
+                    <Card style={{ width: '18rem' }}>
+                        <ListGroup variant="flush">
+                        <ListGroup.Item>
+                        <label for="displaysections" >{section.menu_section_name}</label>
+                        <Button variant="link" name={section._id} onClick={this.onDeleteSubmit}>Delete</Button>
+                        </ListGroup.Item>
+                        </ListGroup>
                     </Card>
                 </div>
             )
-        }
+        })
 
+
+        let section_options = null;
+        if (
+            this.state &&
+            this.state.fetched_menu_sections &&
+            this.state.fetched_menu_sections.length > 0
+        ) {
+            section_options = this.state.fetched_menu_sections.map(menu_section => {
+                return (
+                    <Dropdown.Item
+                        key={menu_section._id}
+                        onClick={this.handleSelection}
+                        name={menu_section.menu_section_name}
+                    >
+                        {menu_section.menu_section_name}
+                    </Dropdown.Item>
+                );
+            });
+        }
+        //end sun
 
 
         return (
@@ -292,19 +308,33 @@ class Sections extends Component {
                                 <Card.Body>
                                     <Card.Title>Update Search</Card.Title>
                                     <Card.Text>
-                                        <form onSubmit={this.onEditGet}>
+                                        <form onSubmit={this.onUpdateSubmit}>
+
+                                            <div>
+                                                <Dropdown>
+                                                    <Dropdown.Toggle variant="info" id="dropdown-basic">
+                                                        Select Section
+                                                        </Dropdown.Toggle>
+                                                    <Dropdown.Menu>{section_options}</Dropdown.Menu>
+                                                </Dropdown>
+                                            </div>
+
                                             <div class="form-group">
                                                 <label for="exampleInputEmail1">Section name</label>
                                                 <input type="text"
                                                     class="form-control"
-                                                    onChange={this.onChangeHandlerForEdit}
-                                                    name="editSectionName"
+                                                    onChange={this.onChangeHandler}
+                                                    name="dynamic_menu_section_name"
                                                     required={true}
                                                     placeholder="Edit Sections here.."
+                                                    defaultValue={this.state.menu_section_name_to_update}
+
                                                 />
                                             </div>
                                             {editGetpopupMsg}
-                                            <button type="submit" class="btn btn-primary">Edit</button>
+                                            {updateStatuspopupMsg}
+
+                                            <button type="submit" class="btn btn-primary">Update</button>
                                         </form>
                                     </Card.Text>
                                 </Card.Body>
@@ -314,22 +344,8 @@ class Sections extends Component {
                             <Card style={{ width: '24rem' }}>
                                 <Card.Body>
                                     <Card.Title>Delete Section</Card.Title>
-                                    <Card.Text>
-                                        <form onSubmit={this.onDeleteSubmit}>
-                                            <div class="form-group">
-                                                <label for="exampleInputEmail1">Section name</label>
-                                                <input type="text"
-                                                    class="form-control"
-                                                    name="deleteSectionName"
-                                                    onChange={this.onChangeHandler}
-                                                    required={true}
-                                                    placeholder="Sections to be deleted.."
-                                                />
-                                            </div>
-                                            {deletePopupMsg}
-                                            <button type="submit" class="btn btn-primary">Delete</button>
-                                        </form>
-                                    </Card.Text>
+                                    {DisplaySectionsForDelete}
+                                    {deletePopupMsg}
                                 </Card.Body>
                             </Card>
                         </Col>

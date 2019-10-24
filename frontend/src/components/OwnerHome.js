@@ -5,6 +5,7 @@ import Navbar from './Navbar.js';
 import { Link } from 'react-router-dom'
 import {  Container,Card, Form, Row, Col,Button, Alert } from "react-bootstrap";
 import URL from '../config'
+import MessageModal from './MessageModal'
 
 class OwnerHome extends Component {
     constructor(props) {
@@ -24,6 +25,7 @@ class OwnerHome extends Component {
                     this.setState({
                         pending_orders: response.data
                     });
+                    console.log(response.data);
                 }
             })
             .catch(err => {
@@ -39,10 +41,15 @@ class OwnerHome extends Component {
 
 
     onOrderStatusChange = (e) => {
+        
         e.preventDefault();
-        let order_id = parseInt(e.target.name);
+        let order_id = e.target.name;
+        console.log(`****---order_id----*****`);
+        console.log(order_id);
         let orders = this.state.pending_orders;
-        let index = orders.findIndex((order => order.order_id === order_id));
+        let index = orders.findIndex((order => order._id === order_id));
+        console.log(`*****---index----*****`);
+        console.log(index);
         let newStatus = e.target.value;
 
         orders[index].order_status = newStatus;
@@ -77,7 +84,7 @@ class OwnerHome extends Component {
         let message = null;
         let statusDropdown;
         let statusOptions;
-        let statuses = ["ORDER_PLACED", "ORDER_CONFIRMED", "PREPARING", "OUT_FOR_DELIVERY", "DELIVERED", "ORDER_DECLINED"];
+        let statuses = ["ORDER_PLACED", "DELIVERED", "ORDER_DECLINED"];
 
         if (!localStorage.getItem('token')) {
             redirectvar = <Redirect to="/" />
@@ -107,7 +114,7 @@ class OwnerHome extends Component {
                         return <option>{status}</option>;
                     });
                     statusDropdown = (
-                        <Form.Control as="select" style={{ width: "90%" }} name={order.order_id} onChange={this.onOrderStatusChange}>
+                        <Form.Control as="select" style={{ width: "90%" }} name={order._id} onChange={this.onOrderStatusChange}>
                             {statusOptions}
                         </Form.Control>
                     );
@@ -116,8 +123,8 @@ class OwnerHome extends Component {
                             <Card.Body>
                                 <Row>
                                     <Col>
-                                        <Card.Title>{order.name}</Card.Title>
-                                        <Card.Subtitle className="mb-2 text-muted">{order.address}</Card.Subtitle>
+                                        <Card.Title>{order.customer.customer_name}</Card.Title>
+                                        <Card.Subtitle className="mb-2 text-muted">{order._id}</Card.Subtitle>
                                         <Card.Subtitle className="mb-2 text-muted">{order.phone_number}</Card.Subtitle>
                                         <br />
                                         <Card.Text>{order.order_date}</Card.Text>
@@ -133,6 +140,7 @@ class OwnerHome extends Component {
                                         <br />
                                         {statusDropdown}
                                         <br />
+                                        <MessageModal order={order}/>
                                     </Col>
                                 </Row>
                             </Card.Body>

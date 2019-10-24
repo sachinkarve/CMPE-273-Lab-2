@@ -43,7 +43,7 @@ class Navigationbar extends Component {
     let navCart = null;
 
     if (localStorage.getItem('token')) {
-      loginLink = <Link to="/" className="nav-link" onClick={this.handleLogout}>Logout</Link>;
+      loginLink = <Link to="/login" className="nav-link" onClick={this.handleLogout}>Logout</Link>;
     }
     else {
       loginLink = <Link to="/login" className="nav-link" onClick={this.handleLogout}>Login</Link>;

@@ -30,16 +30,17 @@ class OwnerProfile extends Component {
         axios.defaults.headers.common['authorization']= localStorage.getItem('token')
         axios.post(`${URL}/profile/restaurantget`, data)
             .then(response => {
+                console.log(response);
                 this.setState({
-                    user_id: response.data[0].user_id,
-                    name: response.data[0].name,
-                    email_id: response.data[0].email_id,
-                    user_image: response.data[0].user_image,
-                    address: response.data[0].address,
-                    phone_number: response.data[0].phone_number,
-                    res_name: response.data[0].res_name,
-                    res_cuisine: response.data[0].res_cuisine,
-                    res_zip_code: response.data[0].res_zip_code,
+                    user_id: response.data.user_id,
+                    name: response.data.name,
+                    email_id: response.data.email,
+                    user_image: response.data.user_image,
+                    address: response.data.address,
+                    phone_number: response.data.phone_number,
+                    res_name: response.data.restaurant.res_name,
+                    res_cuisine: response.data.restaurant.res_cuisine,
+                    res_zip_code: response.data.restaurant.res_zip_code,
                 });
                 localStorage.setItem("name", this.state.name);
             })

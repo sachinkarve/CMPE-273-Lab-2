@@ -11,7 +11,7 @@ class Home extends Component {
         let homeRender = null;
         if (localStorage.getItem('token')) {
             
-            if (localStorage.getItem("is_owner")==="1") {
+            if (localStorage.getItem("is_owner")==="true") {
                 homeRender = <OwnerHome />
             }
             else {

@@ -9,18 +9,15 @@ class ConfirmOrder extends Component {
     constructor(props) {
         super(props);
 
-        this.getUserProfile();
+        //this.getUserProfile();
         this.placeOrder = this.placeOrder.bind(this);
     }
     componentWillMount() {
         document.title = "Your Order";
         if (this.props.location.state) {
             this.setState({
-                restaurant: this.props.location.state.restaurant,
+                restaurant: localStorage.getItem("cart_res_name"),
                 cart_items: this.props.location.state.cart_items,
-                discount: this.props.location.state.discount,
-                delivery: this.props.location.state.delivery,
-                tax: this.props.location.state.tax,
                 sub_total: this.props.location.state.subTotal,
                 total: this.props.location.state.total
             });
@@ -48,9 +45,9 @@ class ConfirmOrder extends Component {
 
         let data = {
             user_id: localStorage.getItem("user_id"),
-            res_id: this.state.restaurant.res_id,
+            res_id: localStorage.getItem("cart_res_id"),
             order_status: 'ORDER_PLACED',
-            sub_total: this.state.sub_total,
+            sub_total: 0,
             discount: 0,
             delivery: 0,
             tax: 0,
@@ -61,11 +58,11 @@ class ConfirmOrder extends Component {
         axios.defaults.headers.common['authorization']= localStorage.getItem('token') 
         axios.post(`${URL}/restaurant/placeorder`, data)
             .then(response => {
-                if (response.data.status === "ORDER_PLACED") {
+                if (response.data === "ORDER_PLACED") {
                     localStorage.removeItem("cart_items");
                     localStorage.removeItem("cart_res_id");
                     this.setState({
-                        message: response.data.status
+                        message: response.data
                     });
                 }
             })
@@ -100,8 +97,7 @@ class ConfirmOrder extends Component {
                     <Card bg="light" style={{width: "40rem", height: "30rem"}}>
                         <Card.Title>
                             <br />
-                            <h3>{this.state.restaurant.res_name}</h3>
-                            {this.state.restaurant.address} | {this.state.restaurant.res_zip_code}
+                            <h3>{localStorage.getItem("cart_res_name")}</h3>
                         </Card.Title>
                         <Card.Body>
                             <Table style={{ width: "90%" }}>
@@ -116,14 +112,7 @@ class ConfirmOrder extends Component {
                                         <td align="center"><b>$ {this.state.total}</b></td>
                                     </tr>
                                     <br/>
-                                    {/* <tr>
-                                        <td colSpan="4">Delivery Address</td>
-                                        <td align="center">{this.state.address}</td>
-                                    </tr>
-                                    <tr>
-                                        <td colSpan="4">Contact Number</td>
-                                        <td align="center">{this.state.phone_number}</td>
-                                    </tr> */}
+                                   
                                 </tbody>
                             </Table>
                             <center>

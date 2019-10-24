@@ -13,7 +13,7 @@ class PastOrders extends Component {
         let ordersComponent = null;
         let redirectVar = null;
         if (localStorage.getItem("user_id")) {
-            if (localStorage.getItem("is_owner") === "1")
+            if (localStorage.getItem("is_owner") === "true")
                 ordersComponent = <OwnerPastOrders/>
             else
                 ordersComponent = <CustomerPastOrders />
@@ -24,7 +24,6 @@ class PastOrders extends Component {
         return (
             <div>
                 {redirectVar}
-                <Navbar /><br/>
                 {ordersComponent}
             </div>
         )

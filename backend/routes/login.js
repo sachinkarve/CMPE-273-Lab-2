@@ -1,33 +1,25 @@
 const express = require('express')
 const router = express.Router();
-const pool = require('../pool')
 const passwordHash = require('password-hash');
 const config = require('../config');
 
 const passport = require('passport')
 const jwt = require('jsonwebtoken')
 require('../passport')(passport);
-const user = require('../db_Schema/user');
+const userModel = require('../db_Schema/user');
 
 
 // Authenticate the user and get a JSON Web Token to include in the header of future requests.
 router.post('/', function (req, res) {
-  user.findOne({
+  userModel.findOne({
     email: req.body.email_id
   }, function (err, user) {
     if (err) {
-      res.writeHead(500, {
-        'Content-Type': 'text/plain'
-      });
-      res.end("Error in Data");
+      res.status(500).send("Error in Data")
       return;
     }
     if (!user) {
-
-      res.writeHead(401, {
-        'Content-Type': 'text/plain'
-      })
-      res.end("No user with this email id");
+      res.status(400).send("No user with this email id")
       return;
 
     } else {
@@ -36,7 +28,7 @@ router.post('/', function (req, res) {
         // Create token if the password matched and no error was thrown
         console.log(user);
 
-        const { _id, name, email, is_owner } = user;
+        const { _id , name, email, is_owner } = user;
         const payload = {_id,  name, email, is_owner }
 
         var token = jwt.sign(payload, config.secret, {
@@ -44,11 +36,7 @@ router.post('/', function (req, res) {
         });
         res.json({ success: true, token: 'JWT ' + token });
       } else {
-
-        res.writeHead(401, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("Password Incorrect");
+        res.status(401).send("Password Incorrect")
         return;
       }
     }

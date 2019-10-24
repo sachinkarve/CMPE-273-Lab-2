@@ -2,88 +2,141 @@ const express = require('express')
 const router = express.Router();
 const pool = require('../pool')
 const passport = require('passport')
+const userModel = require('../db_Schema/user')
+const orderModel = require('../db_Schema/orders')
 
-router.get('/searchrestaurant/:input',passport.authenticate('jwt', { session: false }), (req, res) => {
-    let sql = `CALL Fetch_Search_Results('${req.params.input}');`;
-    console.log(sql);
-    pool.query(sql, (err, response) => {
-      if (err) {
-        res.writeHead(500, {
-          'Content-Type': 'text/plain'
+const _ = require('lodash');
+
+router.get('/searchrestaurant/:search_input', passport.authenticate('jwt', { session: false }), async (req, res) => {
+
+  let searchinput = req.params.search_input.toLowerCase();
+  let owners = await userModel.find({ is_owner: true });
+  console.log(`***--owners---***`);
+  console.log(owners);
+
+  if (!owners) return res.send(400).send("No registered restaurants");
+
+  let restaurants = owners.map(owner => owner.restaurant);
+  console.log(`going till herer`);
+  let searchresults = [];
+  if (req.params.search_input === "_") {
+    searchresults = restaurants;
+  } else {
+    console.log(restaurants);
+    console.log(`***--restaurants---****`);
+    console.log(restaurants);
+    console.log(`going till restaurants`);
+    restaurants.map(restaurant => {
+      if (
+        restaurant.res_name.toLowerCase().includes(searchinput) &&
+        !searchresults.includes(restaurant)
+      )
+        searchresults.push(restaurant);
+      console.log(`***--searchresults---****`);
+      console.log(searchresults);
+      restaurant.menu_sections.map(menu_section => {
+        menu_section.menu_item.map(item => {
+          if (
+            (item.itemName.toLowerCase().includes(searchinput) ||
+              item.itemDescription.toLowerCase().includes(searchinput)) &&
+            !searchresults.includes(restaurant)
+          )
+            searchresults.push(restaurant);
         });
-        res.end("ERROR_IN_DATA");
-      }
-      if (response && response.length > 0 && response[0][0]) {
-        res.writeHead(200, {
-          'Content-Type': 'text/plain'
-        });
-        res.end(JSON.stringify(response[0]));
-      }
+      });
     });
+  }
+  if (searchresults.length > 0) return res.status(200).send(searchresults);
+
+  return res.status(200).send("No match");
+});
+
+
+
+router.post('/placeorder', async(req, res) => {
+
+console.log(`******----placeorder------******`);
+console.log(req.body);
+
+  let user = await userModel.findOne({
+    _id: req.body.user_id
   });
-
-
-
-
-  router.get('/:res_id', (req, res) => {
-
-    let sql = `CALL Fetch_restaurant_owner(NULL, NULL, ${req.params.res_id});`;
-    console.log(sql);
-    pool.query(sql, (err, result) => {
-      if (err) {
-        res.writeHead(500, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("Database Error");
-      }
-      if (result && result.length > 0 && result[0][0]) {
-        res.writeHead(200, {
-          'Content-Type': 'text/plain'
-        });
-        res.end(JSON.stringify(result[0][0]));
-      }
-    });
+  if (!user) return res.status(400).send("User does not exist");
+  console.log("------------user-------------");
+  console.log(user);
+  const customer = _.pick(user, [
+    "_id",
+    "name",
+    "email",
+    "address",
+    "phone_number"
+  ]);
+  console.log("------------customer-------------");
+  console.log(customer);
+  let rest = await userModel.findOne({
+    "restaurant._id": req.body.res_id
   });
+  if (!res) return res.status(400).send("Restaurant does not exist");
+  console.log("------------rest-------------");
+  console.log(rest);
+  let restaurant = _.pick(rest.restaurant, [
+    "_id",
+    "user_ref",
+    "res_name",
+    "res_cuisine",
+    "res_zip_code",
+  ]);
 
+  console.log("------------restaurant-------------");
+  console.log(restaurant);
+  
+let items = {
+  itemName: req.body.cart_items[0].item_name,
+    itemPrice: req.body.cart_items[0].item_price,
+    item_quantity: req.body.cart_items[0].item_quantity,
+}
 
-
-  router.post('/placeorder', (req, res) => {
-    let sql = `CALL Insert_orders(${req.body.user_id}, ${req.body.res_id}, '${req.body.order_status}', ${req.body.total});`;
-    console.log(sql);
-    pool.query(sql, (err, result) => {
-      if (err) {
-        console.log(err);
-        res.writeHead(500, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("Database Error");
-      }
-      if (result && result.length > 0 && result[0][0].status === 'ORDER_PLACED') {
-        req.body.cart_items.forEach(cart_item => {
-          let sqlItem = `CALL Insert_orders_items(${result[0][0].order_id}, ${cart_item.item_id}, ${cart_item.item_quantity});`;
-          pool.query(sqlItem, (err, result) => {
-            if (err) {
-              console.log(err);
-              res.writeHead(500, {
-                'Content-Type': 'text/plain'
-              });
-              res.end("Database Error");
-            }
-          });
-        });
-        res.writeHead(200, {
-          'Content-Type': 'text/plain'
-        });
-        res.end(JSON.stringify(result[0][0]));
-      }
-      else {
-        res.writeHead(500, {
-          'Content-Type': 'text/plain'
-        });
-        res.end(result[0][0]);
-      }
-    });
+  let order = new orderModel({
+    order_status : req.body.order_status,
+    total : req.body.total,
+    order_items : items
+  }
+  );
+  console.log("-----order a -------");
+  console.log(order);
+  order.order_date = new Date(Date.now()).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric"
   });
+  order.customer = {
+    customer_id: customer._id,
+    customer_name: customer.name
+    };
+  order.restaurant = {
+    
+    res_id: restaurant._id,
+    owner_user_id: restaurant.user_ref,
+    res_name: restaurant.res_name,
+    
+  };
+  console.log("-----order b -------");
+  console.log(order);
+
+  let place_order = await order.save();
+
+  if (place_order) {
+    return res.status(200).send("ORDER_PLACED");
+  } else {
+    return res.status(400).send("Some thing went wrong");
+  }
 
 
-  module.exports = router;
+
+});
+
+
+module.exports = router;

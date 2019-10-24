@@ -2,124 +2,115 @@ const express = require('express')
 const router = express.Router();
 const pool = require('../pool')
 const passwordHash = require('password-hash');
+const passport = require('passport')
 
+const userModel = require('../db_Schema/user')
 
 //this shows the user profile
 router.post('/userget', (req, res) => {
-    let sql = `CALL Fetch_customer('${req.body.user_id}', NULL);`;
-    pool.query(sql, (err, result) => {
-      if (err) {
-        res.writeHead(500, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("Error in Data");
-      }
-      if (result && result.length > 0 && result[0][0]) {
-        res.writeHead(200, {
-          'Content-Type': 'text/plain'
-        });
-        res.end(JSON.stringify(result[0]));
-      }
-    });
-    console.log(`Fetch Customer`);
-  });
-  
+  userModel.findById(req.body.user_id , (err, user) => {
+    if (err) {
+      res.status(500).send('Error in Data')
+      return;
+    } else {
+      console.log(user);
+      res.status(200).send(user)
+    }
+  })
+});
+
+router.post('/restaurantget', (req, res) => {
+  userModel.findOne({ _id: req.body.user_id }, (err, user) => {
+    if (err) {
+      res.status(500).send('Error in Data')
+      return;
+    } else {
+      console.log(user);
+      res.status(200).send(user)
+    }
+  })
+});
 
 
 //
 router.post('/restaurantupdate', (req, res) => {
-    if(req.body.password === ""){
-      var hashedPassword = "NULL";
+  var hashedPassword;
+  if (req.body.password && req.body.password !== "") {
+    var hashedPassword = passwordHash.generate(req.body.password);
+  } 
+  console.log(`hashedpasswordvalue`);
+  console.log(hashedPassword);
+  userModel.findById(req.body.user_id , (err, user) => {
+    if (err) {
+      res.status(500).send("User_not_Found_which_is_never_gonna_happen")
     }
-    else{
-      var hashedPassword = "'" + passwordHash.generate(req.body.password) +"'";
+    else {
+      userModel.findOneAndUpdate({ _id: req.body.user_id }, {
+        $set: {
+          email: req.body.email_id,
+          name: req.body.name,
+          password: hashedPassword || user.password,
+          address: req.body.address,
+          phone_number: req.body.phone_number,
+          restaurant: {
+            res_cuisine: req.body.res_cuisine,
+            res_zip_code: req.body.res_zip_code,
+            res_name: req.body.res_name
+          }
+        }
+      },
+        { new: true },
+        (err, updateResponse) => {
+          if (err) {
+            res.status(500).send("Error in Data")
+            return;
+          } else {
+            res.status(200).send('Restaurant Updated')
+          }
+        });
     }
-    let sql = `CALL Update_Restaurant_Owner(NULL, '${req.body.email_id}', '${req.body.name}', '${req.body.res_name}', '${req.body.res_cuisine}', ${hashedPassword}, '${req.body.res_zip_code}', '${req.body.address}', '${req.body.phone_number}');`;
-    console.log(sql);
-    
-    console.log(req.body);
-    pool.query(sql, (err, result) => {
-      if (err) {
-        console.log(err);
-        res.writeHead(500, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("Error in Data");
-      }
-      if (result && result.length > 0 && result[0][0].status === 'RESTAURANT_UPDATED') {
-        res.writeHead(200, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("Restaurant Updated");
-      }
-      else if(result && result.length > 0 && result[0][0].status === 'NO_RECORD'){
-        res.writeHead(401, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("No Record Found");
-      }
-    });
-    console.log(`Update restaurant`);
-  });
-
-  
+  })
+});
 
 
-  //
+
+
+//
 router.post('/customerupdate', (req, res) => {
-    if(req.body.password === ""){
-      var hashedPassword = "NULL";
+  console.log(`password in request:: ${req.body.password}`);
+  var hashedPassword;
+  if (req.body.password && req.body.password !== "") {
+     hashedPassword =passwordHash.generate(req.body.password);
+  }
+  console.log(`hashedPassword::::`);
+  console.log(hashedPassword);
+
+  userModel.findOne({ _id: req.body.user_id }, (err, user) => {
+    if (err) {
+      throw errs
+    } else {
+      console.log(user.password);
+      userModel.findOneAndUpdate({ _id: req.body.user_id }, {
+        $set: {
+          name: req.body.name,
+          password: hashedPassword || user.password,
+          address: req.body.address,
+          phone_number: req.body.phone_number
+        }
+      }, { new: true },
+        (err, userData) => {
+          if (err) {
+            res.status(500).send('Error in Data');
+            return;
+          }
+          else {
+            res.status(200).send('Customer updated')
+          }
+        })
+
     }
-    else{
-      var hashedPassword = "'" + passwordHash.generate(req.body.password) +"'";
-    }
-    let sql = `CALL Update_customer_profile('${req.body.user_id}', '${req.body.email_id}', '${req.body.name}', ${hashedPassword}, '${req.body.address}', '${req.body.phone_number}' );`;
-    pool.query(sql, (err, result) => {
-      if (err) {
-        console.log(err);
-        res.writeHead(500, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("Error in Data");
-      }
-      if (result && result.length > 0 && result[0][0].status === 'CUSTOMER_UPDATED') {
-        res.writeHead(200, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("Customer updated");
-      }
-      else if(result && result.length > 0 && result[0][0].status === 'NO_RECORD'){
-        res.writeHead(401, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("No Record Found");
-      }
-    });
-    console.log(`Customer update`);
-  });
+  })
+});
 
-  
-
-
-  router.post('/restaurantget', (req, res) => {
-    let sql = `CALL Fetch_Restaurant_Owner('${req.body.user_id}', NULL, NULL);`;
-  
-    pool.query(sql, (err, result) => {
-      if (err) {
-        res.writeHead(500, {
-          'Content-Type': 'text/plain'
-        });
-        res.end("Error in Data");
-      }
-      if (result && result.length > 0 && result[0][0]) {
-        res.writeHead(200, {
-          'Content-Type': 'text/plain'
-        });
-        res.end(JSON.stringify(result[0]));
-      }
-    });
-    console.log(`Restaurant get`);
-  });
-  
 
 module.exports = router;
