@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Redirect } from 'react-router';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom'
 import Navbar from './Navbar.js'
 import item_placeholder from '../images/item_placeholder.jpg'
 import { Row, Card, Alert, ListGroup, Dropdown, Container, Button, Col } from 'react-bootstrap';
 import URL from '../config'
+import propTypes from 'prop-types'
+import { addItemAction, deleteItemAction, updateItemAction } from '../actions/itemAction'
+
+
 
 class Items extends Component {
     constructor(props) {
@@ -45,12 +50,36 @@ class Items extends Component {
         this.updateFieldHandler = this.updateFieldHandler.bind(this);
         this.onAddSubmit = this.onAddSubmit.bind(this);
         this.onDeleteSubmit = this.onDeleteSubmit.bind(this);
-        this.onUpdateHandler = this.onUpdateHandler.bind(this);
+        // this.onUpdateHandler = this.onUpdateHandler.bind(this);
         this.fetchSections = this.fetchSections.bind(this);
         this.handleSelection = this.handleSelection.bind(this);
     }
 
     componentWillMount() {
+        this.fetchSections();
+
+    }
+
+    componentWillReceiveProps(incomingProps) {
+        console.log(`****-----props came in with items----****`);
+        console.log(incomingProps.ITEM);
+
+        if (incomingProps.ITEM === 'ITEM_ADDED' || incomingProps.ITEM ==='ITEM_ADDITION_FAILED' || incomingProps.ITEM=== 'ITEM_EXISTS') {
+            console.log(`inside if #############`);
+            this.setState({ addResponseMsg: incomingProps.ITEM })
+        }
+        else if (incomingProps.ITEM === 'UPDATE_SUCCESSFULL' || incomingProps.ITEM === 'ITEM_EXISTS_CANNOT_UPDATE' ) {
+            console.log(`inside else if #############`);
+            this.setState({ updateStatus: incomingProps.ITEM })
+        } 
+        else if (incomingProps.ITEM === 'DELETION_FAILED' || incomingProps.ITEM === 'ITEM_DELETED_SUCCESSFULLY' ) {
+            console.log(`inside else if of delete#############`);
+            this.setState({ deleteResponseMsg: incomingProps.ITEM })
+        }
+        else {
+            console.log(`****-----SOME PROPS NOT MATCHING ANYTHING-----*****`);
+            console.log(incomingProps);
+        }
         this.fetchSections();
 
     }
@@ -121,6 +150,12 @@ class Items extends Component {
 
     onChangeHandler = (e) => {
         this.setState({ [e.target.name]: e.target.value });
+        this.setState({
+            addResponseMsg: "",
+            deleteResponseMsg: "",
+            updateSearchMsg: null,
+            updateStatus: null,
+        })
     }
 
     updateFieldHandler = (e) => {
@@ -137,8 +172,7 @@ class Items extends Component {
 
 
     onSubmitUpdate = (e) => {
-        console.log(`$$$$$$$$$$$$$$itemID$$$`);
-        console.log(this.state.item_id);
+
         e.preventDefault();
         const data = {
             item_id: this.state.item_id,
@@ -148,53 +182,14 @@ class Items extends Component {
             sec_id: this.state.sec_id,
             user_id: localStorage.getItem('user_id')
         }
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
-        axios.post(`${URL}/item/update`, data)
-            .then(response => {
-                console.log(response.data);
-                this.setState({ updateStatus: response.data })
-                this.fetchSections();
+        console.log(`*******---data----*******`);
+        console.log(data);
+        this.props.updateItemAction(data)
 
-            }).catch(err => {
-                this.setState({ updateStatus: err.status })
-                this.fetchSections();
-
-            });
     }
 
 
-    onUpdateHandler = (e) => {
-        console.log(`inside onUpdateHandler`);
-        console.log(this.state.updateItemName);
-        e.preventDefault();
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
-        axios.get(`${URL}/item/edititem/${this.state.updateItemName}`)
-            .then(Response => {
-                if (Response.data !== "NO_ROW_RETURNED") {
-                    console.log(Response.data)
-                    this.setState({
-                        item_id: Response.data.item_id,
-                        item_response_item_name: Response.data.item_name,
-                        item_response_item_description: Response.data.item_description,
-                        item_response_item_price: Response.data.item_price,
-                        editComponentFlag: true,
-                        updateSearchMsg: "SUCCESS"
-                    })
-                } else {
-                    console.log(`no data received`);
-                    this.setState({
-                        updateSearchMsg: "NO_ROW_RETURNED"
-                    })
-                }
-            })
-            .catch(err => {
-                console.log(`error received:: ${err}`);
-            })
-    }
-
-
-
+    
     onAddSubmit = (e) => {
         //prevent page from refresh
         console.log(`inside add Items ka submit`)
@@ -207,16 +202,7 @@ class Items extends Component {
             menu_section_id: this.state.menu_section_id,
             user_id: this.state.user_id
         }
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
-        axios.post(`${URL}/item/additem`, data)
-            .then(response => {
-                this.setState({ addResponseMsg: response.data })
-                this.fetchSections();
-            }).catch(err => {
-                console.log(err);
-                this.setState({ addResponseMsg: err.data })
-            });
+        this.props.addItemAction(data)
     }
 
 
@@ -234,20 +220,22 @@ class Items extends Component {
         }
         console.log(`data obj below`);
         console.log(data);
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
-        axios.post(`${URL}/item/deleteitem`, data)
-            .then(response => {
-                this.setState({
-                    deleteResponseMsg: response.data
-                })
-                this.fetchSections();
+        // axios.defaults.withCredentials = true;
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
+        // axios.post(`${URL}/item/deleteitem`, data)
+        //     .then(response => {
+        //         this.setState({
+        //             deleteResponseMsg: response.data
+        //         })
+        //         this.fetchSections();
 
-            }).catch(err => {
-                this.setState({
-                    deleteResponseMsg: err.status
-                })
-            });
+        //     }).catch(err => {
+        //         this.setState({
+        //             deleteResponseMsg: err.status
+        //         })
+        //     });
+
+        this.props.deleteItemAction(data)
     }
 
 
@@ -298,7 +286,7 @@ class Items extends Component {
             case "SOMETHING_WENT_WRONG":
                 updateStatusPopupMsg = (<Alert variant="danger">Update failed!!</Alert>)
                 break;
-            case "ITEM_EXISTS":
+            case "ITEM_EXISTS_CANNOT_UPDATE":
                 updateStatusPopupMsg = (<Alert variant="danger">Item Exists!!</Alert>)
                 break;
             default:
@@ -534,4 +522,21 @@ class Items extends Component {
         )
     }
 }
-export default Items
+
+
+
+Items.propTypes = {
+    addItemAction: propTypes.func.isRequired,
+    updateItemAction: propTypes.func.isRequired,
+    deleteItemAction : propTypes.func.isRequired,
+    ITEM: propTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+    ITEM: state.itemReducer.itemState
+})
+
+
+
+
+export default connect(mapStateToProps, { addItemAction, deleteItemAction, updateItemAction })(Items)

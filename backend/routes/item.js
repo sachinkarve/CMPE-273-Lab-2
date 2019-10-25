@@ -10,12 +10,12 @@ const userModel = require('../db_Schema/user')
 router.post('/additem', (req, res) => {
   console.log(`*****----req.body-----****`);
   console.log(req.body);
-let itemObject = {
-  itemName: req.body.itemName,
-  itemDescription: req.body.itemDescription,
-  itemPrice: req.body.itemPrice,
-  sec_ref: req.body.menu_section_id,
-}
+  let itemObject = {
+    itemName: req.body.itemName,
+    itemDescription: req.body.itemDescription,
+    itemPrice: req.body.itemPrice,
+    sec_ref: req.body.menu_section_id,
+  }
   userModel.findById(req.body.user_id, (err, fetchedUser) => {
     if (err) {
       return res.status(500).send("ITEM_ADDITION_FAILED");
@@ -54,7 +54,7 @@ let itemObject = {
 
 
 router.get('/getallitems/:user_id', (req, res) => {
-  
+
 
 
 
@@ -63,44 +63,57 @@ router.get('/getallitems/:user_id', (req, res) => {
 
 
 router.post('/update', (req, res) => {
-console.log(`***---Request Body-----***`);
-console.log(req.body);
+  console.log(`/n/n/n/n/n/n/`);
+  console.log(`***---Request Body-----***`);
+  console.log(req.body);
   userModel.findById(req.body.user_id, (err, fetchedUser) => {
     if (err) {
       return res.status(200).send("SOMETHING_WENT_WRONG");
     } else if (fetchedUser) {
-        section = fetchedUser.restaurant.menu_sections.id(req.body.sec_id);
-        if(!section){
-          res.status(500).send("SECTION_NOT_FOUND");
-        }else{
-          let itemExists =section.menu_item.filter(item=>{
-            item.itemName === req.body.newItemName
-          })
-          if(!itemExists){
+      section = fetchedUser.restaurant.menu_sections.id(req.body.sec_id);
+      if (!section) {
+        res.status(500).send("SECTION_NOT_FOUND");
+      } else {
+        let itemExists = section.menu_item.filter(item => {
 
-            item = section.menu_item.id(req.body.item_id)
-            if(item){
-              item.itemName = req.body.newItemName;
-              item.itemDescription = req.body.newItemDescription;
-              item.itemPrice = req.body.newItemPrice;
-  
-              fetchedUser.save((err,dbres)=>{
-                if(err){
-                  console.log('SOMETHING_WENT_WRONG');
-                  res.status(200).send('SOMETHING_WENT_WRONG')
-                }else{
-                  console.log('UPDATE_SUCCESSFULL');
-                  res.status(200).send('UPDATE_SUCCESSFULL')
-                }
-              })
-            }
-          }else{
-            res.status(200).send('ITEM_EXISTS')
+          console.log(`****---RED_ALERT--*****`);
+          console.log(item.itemName);
+          console.log(req.body.newItemName);
+          console.log(`****---RED_END--*****`);
+
+
+          if (item.itemName === req.body.newItemName) {
+            console.log(`found match!!!!!!!!!!!!!!!!!!!`);
+            return item
           }
+        })
+        console.log(`***--itemExists--****`);
+        console.log(itemExists);
+        if (itemExists.length === 0) {
+
+          item = section.menu_item.id(req.body.item_id)
+          if (item) {
+            item.itemName = req.body.newItemName;
+            item.itemDescription = req.body.newItemDescription;
+            item.itemPrice = req.body.newItemPrice;
+
+            fetchedUser.save((err, dbres) => {
+              if (err) {
+                console.log('SOMETHING_WENT_WRONG');
+                res.status(200).send('SOMETHING_WENT_WRONG')
+              } else {
+                console.log('UPDATE_SUCCESSFULL');
+                res.status(200).send('UPDATE_SUCCESSFULL')
+              }
+            })
+          }
+        } else {
+          res.status(200).send('ITEM_EXISTS_CANNOT_UPDATE')
         }
       }
-    });
+    }
   });
+});
 
 
 //this shows the user profile
@@ -168,26 +181,25 @@ router.post('/deleteitem', (req, res) => {
     if (err) {
       return res.status(200).send("SOMETHING_WENT_WRONG");
     } else if (fetchedUser) {
-        section = fetchedUser.restaurant.menu_sections.id(req.body.sec_id);
-        console.log(`**---section----**`);
-        console.log(section);
-        item = section.menu_item.id(req.body.item_id);
-        console.log(`**---item----**`);
-        console.log(item);
-        item.remove();
-        fetchedUser.save((err,dbres)=>{
-          if (err) {
-            console.log(err);
-            console.log("DELETION_FAILED");
-            res.status(200).send('DELETION_FAILED')
+      section = fetchedUser.restaurant.menu_sections.id(req.body.sec_id);
+      console.log(`**---section----**`);
+      console.log(section);
+      item = section.menu_item.id(req.body.item_id);
+      console.log(`**---item----**`);
+      console.log(item);
+      item.remove();
+      fetchedUser.save((err, dbres) => {
+        if (err) {
+          console.log(err);
+          console.log("DELETION_FAILED");
+          res.status(200).send('DELETION_FAILED')
 
-          } else {
-            console.log(`***-------item_added-------***`)
-            res.status(200).send("ITEM_DELETED_SUCCESSFULLY")
-            console.log("ITEM_DELETED");
-          }
-        })
-
+        } else {
+          console.log(`***-------item_added-------***`)
+          res.status(200).send("ITEM_DELETED_SUCCESSFULLY")
+          console.log("ITEM_DELETED");
+        }
+      })
 
 
 

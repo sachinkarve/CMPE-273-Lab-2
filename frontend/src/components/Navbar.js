@@ -7,20 +7,15 @@ import { Navbar, Dropdown, ButtonGroup, Button, Nav } from 'react-bootstrap';
 class Navigationbar extends Component {
   constructor() {
     super();
-    console.log(`constructor called`)
     this.state = {
       howdyName: ""
     }
-    console.log(this.howdyName);
-    console.log(`constructor end`);
   }
 
   componentDidMount() {
-    console.log(`inside will mount`);
     this.setState({
       howdyName: localStorage.getItem("name")
     })
-    console.log(`local set in component did mouont`);
   }
 
   handleLogout = () => {
@@ -111,7 +106,6 @@ class Navigationbar extends Component {
 
 
     if (localStorage.getItem('token')) {
-      console.log(`inside navuser now checking for kind of user World@@`);
       if (localStorage.getItem("is_owner") === "true") {
 
         navUser = (
