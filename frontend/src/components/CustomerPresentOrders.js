@@ -6,6 +6,7 @@ import { Card, Container, Col, Row, Modal, Button, Alert } from "react-bootstrap
 import { BrowserRouter, Link } from "react-router-dom";
 import URL from '../config'
 import MessageModal from './MessageModal'
+import Draggable from 'react-draggable'
 
 class CustomerPresentOrders extends Component {
     constructor(props) {
@@ -103,6 +104,7 @@ class CustomerPresentOrders extends Component {
             if (orders.length > 0) {
                 orderCards = orders.map(order => {
                     return (
+                        <Draggable>
                         <Card bg="light" style={{ width: "60rem", height: "8rem", margin: "2%" }}>
                             <Card.Body>
                                 <Row>
@@ -129,6 +131,7 @@ class CustomerPresentOrders extends Component {
                                 </Row>
                             </Card.Body>
                         </Card>
+                        </Draggable>
                     );
                 });
             }

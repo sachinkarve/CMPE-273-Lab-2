@@ -4,6 +4,7 @@ import { Card, Container, Col, Row, Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import URL from '../config'
 import Navbar from './Navbar';
+import Draggable from 'react-draggable'
 
 class OwnerOrderHistory extends Component {
     constructor(props) {
@@ -42,6 +43,7 @@ class OwnerOrderHistory extends Component {
             if (orders.length > 0) {
                 orderCards = orders.map(order => {
                     return (
+                        <Draggable>
                         <Card bg="light" style={{ width: "60rem", margin: "3%" }}>
                             <Card.Body>
                                 <Row>
@@ -65,6 +67,7 @@ class OwnerOrderHistory extends Component {
                                 </Row>
                             </Card.Body>
                         </Card>
+                        </Draggable>
                     );
 
                 });

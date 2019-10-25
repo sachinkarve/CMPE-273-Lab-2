@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import {  Container,Card, Form, Row, Col,Button, Alert } from "react-bootstrap";
 import URL from '../config'
 import MessageModal from './MessageModal'
+import Draggable from 'react-draggable'
 
 class OwnerHome extends Component {
     constructor(props) {
@@ -119,6 +120,7 @@ class OwnerHome extends Component {
                         </Form.Control>
                     );
                     return (
+                        <Draggable>
                         <Card bg="light" style={{ width: "60rem", margin: "4%" }}>
                             <Card.Body>
                                 <Row>
@@ -145,6 +147,7 @@ class OwnerHome extends Component {
                                 </Row>
                             </Card.Body>
                         </Card>
+                        </Draggable>
                     );
                 });
             }

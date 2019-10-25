@@ -4,6 +4,7 @@ import { Card, Container, Col, Row, Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Navbar from './Navbar';
 import URL from '../config'
+import Draggable from 'react-draggable'
 
 class CustomerPastOrders extends Component {
     constructor(props) {
@@ -42,6 +43,7 @@ class CustomerPastOrders extends Component {
             if (orders.length > 0) {
                 orderCards = orders.map(order => {
                     return (
+                        <Draggable>
                         <Card style={{ width: "60rem", margin: "4%" }}>
                             <Card.Body>
                                 <Row>
@@ -66,6 +68,7 @@ class CustomerPastOrders extends Component {
                                 </Row>
                             </Card.Body>
                         </Card>
+                        </Draggable>
                     );
 
                 });

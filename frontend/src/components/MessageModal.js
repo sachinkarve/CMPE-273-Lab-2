@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Form, Modal,Alert,ListGroup,Badge, Button } from "react-bootstrap";
+import { Form, Modal,Alert,ListGroup,InputGroup, FormControl, Button } from "react-bootstrap";
 import URL from '../config'
 
 class MessageModal extends Component {
@@ -67,9 +67,12 @@ class MessageModal extends Component {
             .then(response => {
                 if (response.data) {
                     this.setState({
-                        messages: response.data.messages,
+                        messageText : "",
+                        // messages: response.data.messages,
                         visibility: true,
                     });
+                    this.getMessage();
+
                     console.log(`****----response.data--*******`);
                     console.log(response.data);
                 }
@@ -115,7 +118,22 @@ class MessageModal extends Component {
                         <Modal.Title>Chat</Modal.Title>
                     </Modal.Header>
                     <Modal.Body><ul>{msg}</ul></Modal.Body>
-                    <Form.Control type="message" name="message" required={true} onChange={this.onChangeHandler} placeholder="Type your message here..." />
+
+<div>
+                    <input type="text"
+                                                    class="form-control"
+                                                    onChange={this.onChangeHandler}
+                                                    name="message"
+                                                    required={true}
+                                                    placeholder="new one"
+                                                />
+</div>
+
+
+
+                    {/* <InputGroup className="mb-3">
+                    <FormControl  name="message" required={true} onChange={this.onChangeHandler} placeholder="Type your message here..." />
+                    </InputGroup> */}
                     <Modal.Footer>
                         <Button variant="primary" onClick={this.send}>Send</Button>
                     </Modal.Footer>
