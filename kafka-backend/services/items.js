@@ -1,13 +1,12 @@
 //var bcrypt = require('bcrypt');
 const userModel = require('../db_Schema/user')
 
-
 function handle_request(msg, callback) {
 
     var res = {};
 
     console.log(msg.originalUrl);
-    if (msg.originalUrl === '/item/additem') {
+    if (msg.originalUrl === '/item/additem') {//switch functionality
 
 
         let itemObject = {

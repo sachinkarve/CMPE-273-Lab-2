@@ -3,7 +3,7 @@ var kafka = require('kafka-node');
 function ConnectionProvider() {
     this.getConsumer = function(topic_name) {
         // if (!this.kafkaConsumerConnection) {
-            console.log(`*******------20-------******`);
+            //console.log(`*******------20-------******`);
 
             this.client = new kafka.Client("localhost:2181");
             /*this.client.refreshMetadata([{topic: topic_name}], (err) => {
@@ -28,14 +28,14 @@ function ConnectionProvider() {
                     console.warn('Error refreshing kafka metadata', err);
                 }
             });*/
-            console.log(`*******------22-------******`);
+            //console.log(`*******------22-------******`);
 
             var HighLevelProducer = kafka.HighLevelProducer;
             this.kafkaProducerConnection = new HighLevelProducer(this.client);
             //this.kafkaConnection = new kafka.Producer(this.client);
             console.log('producer ready');
         }
-        console.log(`*******------23-------******`);
+        //console.log(`*******------23-------******`);
 
         return this.kafkaProducerConnection;
     };

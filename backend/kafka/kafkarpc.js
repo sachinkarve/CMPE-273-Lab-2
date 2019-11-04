@@ -20,9 +20,9 @@ KafkaRPC.prototype.makeRequest = function(topic_name, content, callback){
     self = this;
     //generate a unique correlation id for this call
     var correlationId = crypto.randomBytes(16).toString('hex');
-	console.log(`*******------9-------******`);
-	console.log(correlationId);
-	console.log(`*******------10-------******`);
+	// console.log(`*******------9-------******`);
+	// console.log(correlationId);
+	// console.log(`*******------10-------******`);
 
     //create a timeout for what should happen if we don't get a response
     var tId = setTimeout(function(corr_id){
@@ -39,18 +39,18 @@ KafkaRPC.prototype.makeRequest = function(topic_name, content, callback){
         callback:callback,
         timeout: tId //the id for the timeout so we can clear it
     };
-    console.log(entry);
-	console.log(`*******------11-------******`);
+    // console.log(entry);
+	// console.log(`*******------11-------******`);
 
 
     //put the entry in the hash so we can match the response later
     self.requests[correlationId]=entry;
-    console.log(self.requests);
-	console.log(`*******------12-------******`);
+    // console.log(self.requests);
+	// console.log(`*******------12-------******`);
 
     //make sure we have a response topic
     self.setupResponseQueue(self.producer,topic_name,function(){
-        console.log(`*******------13-------******`);
+       // console.log(`*******------13-------******`);
 
         console.log('in response');
         //put the request on a topic
@@ -62,11 +62,11 @@ KafkaRPC.prototype.makeRequest = function(topic_name, content, callback){
                 data:content}),
                 partition:0}
         ];
-        console.log(`*******------14-------******`);
+       // console.log(`*******------14-------******`);
 
         console.log('in response1');
         console.log(self.producer.ready);
-        console.log(`*******------15-------******`);
+       // console.log(`*******------15-------******`);
 
         self.producer.send(payloads, function(err, data){
             console.log('in response2');
@@ -82,13 +82,13 @@ KafkaRPC.prototype.setupResponseQueue = function(producer,topic_name, next){
     //don't mess around if we have a queue
     if(this.response_queue) return next();
 
-	console.log(`*******------16-------******`);
+	//console.log(`*******------16-------******`);
 
     self = this;
 
     //subscribe to messages
     var consumer = self.connection.getConsumer('response_topic');
-    console.log(`*******------17-------******`);
+    //console.log(`*******------17-------******`);
 
     consumer.on('message', function (message) {
         console.log('msg received');

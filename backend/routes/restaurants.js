@@ -4,135 +4,190 @@ const pool = require('../pool')
 const passport = require('passport')
 const userModel = require('../db_Schema/user')
 const orderModel = require('../db_Schema/orders')
+var kafka = require('../kafka/client');
 
 const _ = require('lodash');
+// passport.authenticate('jwt', { session: false })
+router.get('/searchrestaurant/:search_input', (req, res) => {
 
-router.get('/searchrestaurant/:search_input', passport.authenticate('jwt', { session: false }), async (req, res) => {
+let params={
+  search_input : req.params.search_input,
+  originalUrl : req.originalUrl
+}
 
-  let searchinput = req.params.search_input.toLowerCase();
-  let owners = await userModel.find({ is_owner: true });
-  console.log(`***--owners---***`);
-  console.log(owners);
+ // req.body.originalUrl = req.originalUrl
 
-  if (!owners) return res.send(400).send("No registered restaurants");
+  kafka.make_request('restaurants', params, function (err, results) {
+    
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      if(results == "NOTHING_WORKED"){
+        console.log(`##############`);
+        res.status(500).send('NOTHING_WORKED');
+      }else{
+        console.log(`$$$$$$$$$$$$$$`)
+        res.status(200).send(results)
+      }
+    }
+  });
 
-  let restaurants = owners.map(owner => owner.restaurant);
-  console.log(`going till herer`);
-  let searchresults = [];
-  if (req.params.search_input === "_") {
-    searchresults = restaurants;
-  } else {
-    console.log(restaurants);
-    console.log(`***--restaurants---****`);
-    console.log(restaurants);
-    console.log(`going till restaurants`);
-    restaurants.map(restaurant => {
-      if (
-        restaurant.res_name.toLowerCase().includes(searchinput) &&
-        !searchresults.includes(restaurant)
-      )
-        searchresults.push(restaurant);
-      console.log(`***--searchresults---****`);
-      console.log(searchresults);
-      restaurant.menu_sections.map(menu_section => {
-        menu_section.menu_item.map(item => {
-          if (
-            (item.itemName.toLowerCase().includes(searchinput) ||
-              item.itemDescription.toLowerCase().includes(searchinput)) &&
-            !searchresults.includes(restaurant)
-          )
-            searchresults.push(restaurant);
-        });
-      });
-    });
-  }
-  if (searchresults.length > 0) return res.status(200).send(searchresults);
 
-  return res.status(200).send("No match");
+
+
+
+
+
+
+
+  // let searchinput = req.params.search_input.toLowerCase();
+  // let owners = await userModel.find({ is_owner: true });
+  // console.log(`***--owners---***`);
+  // console.log(owners);
+
+  // if (!owners) return res.send(400).send("No registered restaurants");
+
+  // let restaurants = owners.map(owner => owner.restaurant);
+  // console.log(`going till herer`);
+  // let searchresults = [];
+  // if (req.params.search_input === "_") {
+  //   searchresults = restaurants;
+  // } else {
+  //   console.log(restaurants);
+  //   console.log(`***--restaurants---****`);
+  //   console.log(restaurants);
+  //   console.log(`going till restaurants`);
+  //   restaurants.map(restaurant => {
+  //     if (
+  //       restaurant.res_name.toLowerCase().includes(searchinput) &&
+  //       !searchresults.includes(restaurant)
+  //     )
+  //       searchresults.push(restaurant);
+  //     console.log(`***--searchresults---****`);
+  //     console.log(searchresults);
+  //     restaurant.menu_sections.map(menu_section => {
+  //       menu_section.menu_item.map(item => {
+  //         if (
+  //           (item.itemName.toLowerCase().includes(searchinput) ||
+  //             item.itemDescription.toLowerCase().includes(searchinput)) &&
+  //           !searchresults.includes(restaurant)
+  //         )
+  //           searchresults.push(restaurant);
+  //       });
+  //     });
+  //   });
+  // }
+  // if (searchresults.length > 0) return res.status(200).send(searchresults);
+
+  // return res.status(200).send("No match");
 });
 
 
 
-router.post('/placeorder', async(req, res) => {
+router.post('/placeorder', (req, res) => {
 
-console.log(`******----placeorder------******`);
-console.log(req.body);
+  req.body.originalUrl = req.originalUrl
 
-  let user = await userModel.findOne({
-    _id: req.body.user_id
+  kafka.make_request('restaurants', req.body, function (err, results) {
+    
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      if(results == "NOT_FETCHED"){
+        console.log(`##############`);
+        res.status(500).send('UNABLE_TO_FETCH');
+      }else{
+        console.log(`$$$$$$$$$$$$$$`)
+        res.status(200).send(results)
+      }
+    }
   });
-  if (!user) return res.status(400).send("User does not exist");
-  console.log("------------user-------------");
-  console.log(user);
-  const customer = _.pick(user, [
-    "_id",
-    "name",
-    "email",
-    "address",
-    "phone_number"
-  ]);
-  console.log("------------customer-------------");
-  console.log(customer);
-  let rest = await userModel.findOne({
-    "restaurant._id": req.body.res_id
-  });
-  if (!res) return res.status(400).send("Restaurant does not exist");
-  console.log("------------rest-------------");
-  console.log(rest);
-  let restaurant = _.pick(rest.restaurant, [
-    "_id",
-    "user_ref",
-    "res_name",
-    "res_cuisine",
-    "res_zip_code",
-  ]);
 
-  console.log("------------restaurant-------------");
-  console.log(restaurant);
+
+
+
+
+
+
+
+// console.log(`******----placeorder------******`);
+// console.log(req.body);
+
+//   let user = await userModel.findOne({
+//     _id: req.body.user_id
+//   });
+//   if (!user) return res.status(400).send("User does not exist");
+//   console.log("------------user-------------");
+//   console.log(user);
+//   const customer = _.pick(user, [
+//     "_id",
+//     "name",
+//     "email",
+//     "address",
+//     "phone_number"
+//   ]);
+//   console.log("------------customer-------------");
+//   console.log(customer);
+//   let rest = await userModel.findOne({
+//     "restaurant._id": req.body.res_id
+//   });
+//   if (!res) return res.status(400).send("Restaurant does not exist");
+//   console.log("------------rest-------------");
+//   console.log(rest);
+//   let restaurant = _.pick(rest.restaurant, [
+//     "_id",
+//     "user_ref",
+//     "res_name",
+//     "res_cuisine",
+//     "res_zip_code",
+//   ]);
+
+//   console.log("------------restaurant-------------");
+//   console.log(restaurant);
   
-let items = {
-  itemName: req.body.cart_items[0].item_name,
-    itemPrice: req.body.cart_items[0].item_price,
-    item_quantity: req.body.cart_items[0].item_quantity,
-}
+// let items = {
+//   itemName: req.body.cart_items[0].item_name,
+//     itemPrice: req.body.cart_items[0].item_price,
+//     item_quantity: req.body.cart_items[0].item_quantity,
+// }
 
-  let order = new orderModel({
-    order_status : req.body.order_status,
-    total : req.body.total,
-    order_items : items
-  }
-  );
-  console.log("-----order a -------");
-  console.log(order);
-  order.order_date = new Date(Date.now()).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric"
-  });
-  order.customer = {
-    customer_id: customer._id,
-    customer_name: customer.name
-    };
-  order.restaurant = {
+//   let order = new orderModel({
+//     order_status : req.body.order_status,
+//     total : req.body.total,
+//     order_items : items
+//   }
+//   );
+//   console.log("-----order a -------");
+//   console.log(order);
+//   order.order_date = new Date(Date.now()).toLocaleDateString("en-US", {
+//     year: "numeric",
+//     month: "short",
+//     day: "numeric",
+//     hour: "numeric",
+//     minute: "numeric",
+//     second: "numeric"
+//   });
+//   order.customer = {
+//     customer_id: customer._id,
+//     customer_name: customer.name
+//     };
+//   order.restaurant = {
     
-    res_id: restaurant._id,
-    owner_user_id: restaurant.user_ref,
-    res_name: restaurant.res_name,
+//     res_id: restaurant._id,
+//     owner_user_id: restaurant.user_ref,
+//     res_name: restaurant.res_name,
     
-  };
-  console.log("-----order b -------");
-  console.log(order);
+//   };
+//   console.log("-----order b -------");
+//   console.log(order);
 
-  let place_order = await order.save();
+//   let place_order = await order.save();
 
-  if (place_order) {
-    return res.status(200).send("ORDER_PLACED");
-  } else {
-    return res.status(400).send("Some thing went wrong");
-  }
+//   if (place_order) {
+//     return res.status(200).send("ORDER_PLACED");
+//   } else {
+//     return res.status(400).send("Some thing went wrong");
+//   }
 
 
 

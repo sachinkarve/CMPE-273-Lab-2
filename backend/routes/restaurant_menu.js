@@ -22,4 +22,4 @@ router.get('/items/:res_id', (req, res) => {
       }
     });
   });
-  
+  //this doesnt apply for lab 2

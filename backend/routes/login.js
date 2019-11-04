@@ -1,7 +1,9 @@
+//done kafka
 const express = require('express')
 const router = express.Router();
 const passwordHash = require('password-hash');
 const config = require('../config');
+var kafka = require('../kafka/client');
 
 const passport = require('passport')
 const jwt = require('jsonwebtoken')
@@ -11,36 +13,33 @@ const userModel = require('../db_Schema/user');
 
 // Authenticate the user and get a JSON Web Token to include in the header of future requests.
 router.post('/', function (req, res) {
-  userModel.findOne({
-    email: req.body.email_id
-  }, function (err, user) {
+
+  console.log(`****----Inside Login------******`);
+  console.log(req.body);
+  req.body.originalUrl = req.originalUrl;
+  kafka.make_request('login', req.body, function (err, results) {
+    console.log(`*******------2-------******`);
+    console.log('in result');
+    console.log(results);
+    console.log('in errrrrrrr');
+    console.log(err);
+    console.log(`*******------3-------******`);
     if (err) {
-      res.status(500).send("Error in Data")
-      return;
-    }
-    if (!user) {
-      res.status(400).send("No user with this email id")
-      return;
-
+      console.log("Inside err");
+      console.log(err);
+      res.status(500).send(err);
     } else {
-
-      if (passwordHash.verify(req.body.password, user.password)) {
-        // Create token if the password matched and no error was thrown
-        console.log(user);
-
-        const { _id , name, email, is_owner } = user;
-        const payload = {_id,  name, email, is_owner }
-
-        var token = jwt.sign(payload, config.secret, {
-          expiresIn: 1008000 // in seconds
-        });
-        res.json({ success: true, token: 'JWT ' + token });
-      } else {
-        res.status(401).send("Password Incorrect")
-        return;
+      console.log(`*******------4-------******`);
+      console.log("Inside else");
+      console.log(results);
+      if(results === "PASSWORD_INCORRECT"){
+        console.log(`##############`);
+        res.status(401).send('PASSWORD_INCORRECT_NO_USER_FOUND');
+      }else{
+        console.log(`$$$$$$$$$$$$$$`)
+        res.status(200).send(results)
       }
     }
-
   });
 });
 

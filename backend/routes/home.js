@@ -23,6 +23,6 @@ const passwordHash = require('password-hash');
 //       }
 //     });
 //   });
-  
+  //doesnt apply for lab 2
 
 module.exports = router;

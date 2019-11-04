@@ -59,9 +59,6 @@ router.post('/update', (req, res) => {
 
 
 
-
-
-
 //this shows the user profile
 router.post('/deleteitem', (req, res) => {
   req.body.originalUrl = req.originalUrl;
@@ -84,46 +81,6 @@ router.post('/deleteitem', (req, res) => {
       res.status(200).send(results)
     }
   });
-
-
-
-
-
-
-  // userModel.findById(req.body.user_id, (err, fetchedUser) => {
-  //   if (err) {
-  //     return res.status(200).send("SOMETHING_WENT_WRONG");
-  //   } else if (fetchedUser) {
-  //     section = fetchedUser.restaurant.menu_sections.id(req.body.sec_id);
-  //     console.log(`**---section----**`);
-  //     console.log(section);
-  //     item = section.menu_item.id(req.body.item_id);
-  //     console.log(`**---item----**`);
-  //     console.log(item);
-  //     item.remove();
-  //     fetchedUser.save((err, dbres) => {
-  //       if (err) {
-  //         console.log(err);
-  //         console.log("DELETION_FAILED");
-  //         res.status(200).send('DELETION_FAILED')
-
-  //       } else {
-  //         console.log(`***-------item_added-------***`)
-  //         res.status(200).send("ITEM_DELETED_SUCCESSFULLY")
-  //         console.log("ITEM_DELETED");
-  //       }
-  //     })
-  //   }
-  // });
-
-
-
-
-
-
-
-
-
 });
 
 module.exports = router;

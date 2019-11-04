@@ -46,6 +46,6 @@ const storage = multer.diskStorage({
     }
   });
   
-  
+  //lab 2
 
   module.exports = router;

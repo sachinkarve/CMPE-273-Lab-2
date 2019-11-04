@@ -35,5 +35,5 @@ router.get('/item/:item_image', (req, res) => {
         res.sendFile(path.join(__dirname, '..') + '/public/uploads/items/itemplaceholder.jpg')
     }
 });
-
+//lab 2
 module.exports = router;

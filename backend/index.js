@@ -68,13 +68,13 @@ app.use(passport.initialize());
 
 require('./passport')(passport);
 
-mongoose.connect(config.URL, { useNewUrlParser: true, useUnifiedTopology: true },(err,res)=>{
-  if(err){
-    console.log(`MongoDB Connection Failed::: ${err}`);
-  }else{
-    console.log(`Mongo connected!${res}`);
-  }
-});
+// mongoose.connect(config.URL, { useNewUrlParser: true, useUnifiedTopology: true },(err,res)=>{
+//   if(err){
+//     console.log(`MongoDB Connection Failed::: ${err}`);
+//   }else{
+//     console.log(`Mongo connected!${res}`);
+//   }
+// });
 
 
 

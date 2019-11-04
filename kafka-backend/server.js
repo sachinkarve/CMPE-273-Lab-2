@@ -5,7 +5,16 @@ const config = require('./config');
 //var signin = require('./services/signin.js');
 //var Books = require('./services/books.js');
 var ItemService = require('./services/items.js');
+var LoginService = require('./services/login.js');
+var MessagingService = require('./services/ordersmessaging.js');
+var OrdersService = require('./services/orders.js');
+var MenuService = require('./services/menu.js');
 
+var SignupService = require('./services/signup.js');
+var ProfileService = require('./services/profile.js');
+var SectionService = require('./services/sections.js');
+
+var RestaurantService = require('./services/restaurants.js');
 
 
 const mongoose = require('mongoose'); 
@@ -52,5 +61,13 @@ function handleTopicRequest(topic_name,fname){
 //first argument is topic name
 //second argument is a function that will handle this topic request
 handleTopicRequest("items",ItemService)
+handleTopicRequest("login",LoginService)
+handleTopicRequest("messaging",MessagingService)
+handleTopicRequest("orders",OrdersService)
+handleTopicRequest("signup",SignupService)
+handleTopicRequest("profile",ProfileService)
+handleTopicRequest("restaurants",RestaurantService)
+handleTopicRequest("sections",SectionService)
+handleTopicRequest("menu",MenuService)
 
 //handleTopicRequest("post_book",Books)

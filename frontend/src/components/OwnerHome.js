@@ -55,7 +55,8 @@ class OwnerHome extends Component {
 
         orders[index].order_status = newStatus;
 
-
+console.log(`*******----newStatus---*******`);
+console.log(newStatus);
 
         let data = {
             order_status: newStatus,

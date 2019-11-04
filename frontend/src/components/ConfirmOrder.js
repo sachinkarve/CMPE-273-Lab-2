@@ -140,7 +140,7 @@ class ConfirmOrder extends Component {
                         <br /><br />
                     </center>
                 </Container>
-            </div >
+            </div>
         )
     }
 }

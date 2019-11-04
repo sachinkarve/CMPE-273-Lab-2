@@ -16,15 +16,11 @@ class Home extends Component {
             }
             else {
                 homeRender = <CustomerHome />
-
             }
         }
         else {
             redirectvar = <Redirect to="/login" />
         }
-
-
-
         return (
             <div>
                 {redirectvar}

@@ -26,14 +26,16 @@ class Restaurant extends Component {
     }
 
     getSections = () => {
-        console.log(`%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%`);
         if (this.props.location.state) {
             axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-            console.log(`@@@@@@@@@@@@@@@@`);
-            console.log(this.props.location.state.user_ref);
+            console.log(`*****-----this.props.location.state.user_ref----*****`);
+            console.log(this.props);
+            console.log(this.props.location.state._id);
             axios.get(`${URL}/menu/sections/${this.props.location.state.user_ref}`)
                 .then(response => {
                     if (response.data) {
+                        console.log(`****----Below is the response.data----*****`);
+                        console.log(response.data);
                         this.setState({
                             menu_sections: response.data
                         });

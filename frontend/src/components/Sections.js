@@ -151,7 +151,7 @@ class Sections extends Component {
         axios.post(`${URL}/section/deletesection`, data)
             .then(response => {
                 console.log(response.data);
-                if (response.data === "SUCCESS") {
+                if (response.data === "SECTION_DELETED_SUCCESSFULLY") {
                     this.setState({
                         deleteResponseMsg: "SECTION_DELETED_SUCCESSFULLY"
                     })
