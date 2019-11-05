@@ -4,6 +4,12 @@ import { Redirect } from 'react-router';
 import { Link } from 'react-router-dom'
 import Navbar from './Navbar.js'
 import URL from '../config'
+import { connect } from 'react-redux';
+
+
+import propTypes from 'prop-types'
+import { addSectionAction, deleteSectionAction, updateSectionAction } from '../actions/sectionAction'
+
 
 import { Row, Dropdown,ListGroup, Alert, Card, Container, Button, Col } from 'react-bootstrap';
 
@@ -39,6 +45,40 @@ class Sections extends Component {
     componentWillMount() {
         this.fetchSections();
     }
+
+
+    componentWillReceiveProps(incomingProps) {
+        console.log(`****-----props came in with items----****`);
+        console.log(incomingProps.SECTION);
+
+        if (incomingProps.ITEM === 'UPDATE_SUCCESSFUL' || incomingProps.ITEM ==='FAILED') {
+            console.log(`inside if #############`);
+            this.setState({ updatePostStatus: incomingProps.ITEM })
+        }      
+        else if (incomingProps.ITEM === 'SECTION_ADDITION_FAILED' || incomingProps.ITEM === 'SECTION_EXISTS' || incomingProps.ITEM === 'SECTION_ADDED') {
+            console.log(`inside else if #############`);
+            this.setState({ addResponseMsg: incomingProps.ITEM })
+        }    
+        else if (incomingProps.ITEM === 'SECTION_DELETED_SUCCESSFULLY' || incomingProps.ITEM === 'DELETION_FAILED'|| incomingProps.ITEM === 'SECTION_DOES_NOT_EXISTS' ) {
+            console.log(`inside else if of delete#############`);
+            this.setState({ deleteResponseMsg: incomingProps.ITEM })
+        }
+        else {
+            console.log(`****-----SOME PROPS NOT MATCHING ANYTHING-----*****`);
+            console.log(incomingProps);
+        }
+        this.fetchSections();
+
+    }
+
+
+
+
+
+
+
+
+
     handleSelection = e => {
         e.preventDefault();
         let section_name = e.target.name;
@@ -82,22 +122,23 @@ class Sections extends Component {
             section_id: this.state.menu_section_id_to_update,
             user_id: localStorage.getItem("user_id")
         }
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
-        axios.post(`${URL}/section/editsection`, data)
-            .then(response => {
-                console.log(response);
-                this.fetchSections();
+        this.props.updateSectionAction(data);
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
+        // axios.post(`${URL}/section/editsection`, data)
+        //     .then(response => {
+        //         console.log(response);
+        //         this.fetchSections();
 
-                this.setState({
-                    updatePostStatus: "UPDATE_SUCCESSFUL"
-                })
-            })
-            .catch(err => {
-                console.log(`error occured:: ${err}`);
-                this.setState({
-                    updatePostStatus: "FAILED"
-                })
-            });
+        //         this.setState({
+        //             updatePostStatus: "UPDATE_SUCCESSFUL"
+        //         })
+        //     })
+        //     .catch(err => {
+        //         console.log(`error occured:: ${err}`);
+        //         this.setState({
+        //             updatePostStatus: "FAILED"
+        //         })
+        //     });
     }
 
     onChangeHandler = (e) => {
@@ -114,28 +155,29 @@ class Sections extends Component {
             sectionName: this.state.addSectionName,
             user_id: this.state.user_id
         }
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
-        axios.post(`${URL}/section/addsection`, data)
-            .then(response => {
-                console.log(response.data);
-                if (response.data === "SECTION_ADDED") {
-                    this.setState({
-                        addResponseMsg: "SECTION_ADDED"
-                    })
-                    this.fetchSections();
-                } else if (response.data === "SECTION_EXISTS") {
-                    this.setState({
-                        addResponseMsg: "SECTION_EXISTS"
-                    })
-                }
-            }).catch(err => {
-                console.log(err);
+        this.props.addSectionAction(data);
+        // axios.defaults.withCredentials = true;
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
+        // axios.post(`${URL}/section/addsection`, data)
+        //     .then(response => {
+        //         console.log(response.data);
+        //         if (response.data === "SECTION_ADDED") {   
+        //             this.setState({
+        //                 addResponseMsg: "SECTION_ADDED"
+        //             })
+        //             this.fetchSections();
+        //         } else if (response.data === "SECTION_EXISTS") {
+        //             this.setState({
+        //                 addResponseMsg: "SECTION_EXISTS"
+        //             })
+        //         }
+        //     }).catch(err => {
+        //         console.log(err);
 
-                this.setState({
-                    addResponseMsg: "SECTION_ADDITION_FAILED"
-                })
-            });
+        //         this.setState({
+        //             addResponseMsg: "SECTION_ADDITION_FAILED"
+        //         })
+        //     });
     }
 
     onDeleteSubmit = (e) => {
@@ -146,28 +188,29 @@ class Sections extends Component {
             menu_section_id: e.target.name,
             user_id: this.state.user_id
         }
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
-        axios.post(`${URL}/section/deletesection`, data)
-            .then(response => {
-                console.log(response.data);
-                if (response.data === "SECTION_DELETED_SUCCESSFULLY") {
-                    this.setState({
-                        deleteResponseMsg: "SECTION_DELETED_SUCCESSFULLY"
-                    })
-                    this.fetchSections();
+        this.props.deleteSectionAction(data);
+        // axios.defaults.withCredentials = true;
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
+        // axios.post(`${URL}/section/deletesection`, data)
+        //     .then(response => {
+        //         console.log(response.data);
+        //         if (response.data === "SECTION_DELETED_SUCCESSFULLY") {   
+        //             this.setState({
+        //                 deleteResponseMsg: "SECTION_DELETED_SUCCESSFULLY"
+        //             })
+        //             this.fetchSections();
 
-                }
-                else if (response.data === "SECTION_DOES_NOT_EXISTS") {
-                    this.setState({
-                        deleteResponseMsg: "SECTION_DOES_NOT_EXIST"
-                    })
-                }
-            }).catch(err => {
-                this.setState({
-                    deleteResponseMsg: "DELETION_FAILED"
-                })
-            });
+        //         }
+        //         else if (response.data === "SECTION_DOES_NOT_EXISTS") {
+        //             this.setState({
+        //                 deleteResponseMsg: "SECTION_DOES_NOT_EXIST"
+        //             })
+        //         }
+        //     }).catch(err => {
+        //         this.setState({
+        //             deleteResponseMsg: "DELETION_FAILED"
+        //         })
+        //     });
     }
 
     render() {
@@ -362,4 +405,18 @@ class Sections extends Component {
         )
     }
 }
-export default Sections
+
+
+Sections.propTypes = {
+    addSectionAction: propTypes.func.isRequired,
+    updateSectionAction: propTypes.func.isRequired,
+    deleteSectionAction : propTypes.func.isRequired,
+    SECTION: propTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+    SECTION: state.sectionReducer.sectionState
+})
+
+
+export default connect(mapStateToProps, { addSectionAction, deleteSectionAction, updateSectionAction })(Sections)

@@ -3,7 +3,7 @@ import { combineReducers } from 'redux';
 // import loginReducer from './loginReducer';
 // import signupReducer from './signupReducer';
 // import restaurantReducer from './restaurantReducer';
-// import menuSectionReducer from './menuSectionReducer';
+import sectionReducer from './sectionReducer';
 import itemReducer from './itemReducer';
 // import orderReducer from './orderReducer';
 // import messageReducer from './messageReducer';
@@ -13,7 +13,7 @@ export default combineReducers({
     // signup: signupReducer,
     // profile: profileReducer,
     // restaurant: restaurantReducer,
-    // menuSection: menuSectionReducer,
+    sectionReducer: sectionReducer,
     itemReducer: itemReducer,
     // order: orderReducer,
     // messenger: messageReducer,
