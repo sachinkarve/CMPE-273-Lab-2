@@ -85,6 +85,8 @@ class Items extends Component {
     }
 
     fetchSections = () => {
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
+
         axios
             .get(`${URL}/section/${localStorage.getItem("user_id")}`)
             .then(response => {

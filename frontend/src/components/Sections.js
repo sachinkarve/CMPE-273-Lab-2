@@ -51,17 +51,17 @@ class Sections extends Component {
         console.log(`****-----props came in with items----****`);
         console.log(incomingProps.SECTION);
 
-        if (incomingProps.ITEM === 'UPDATE_SUCCESSFUL' || incomingProps.ITEM ==='FAILED') {
+        if (incomingProps.SECTION === 'UPDATE_SUCCESSFUL' || incomingProps.SECTION ==='FAILED') {
             console.log(`inside if #############`);
-            this.setState({ updatePostStatus: incomingProps.ITEM })
+            this.setState({ updatePostStatus: incomingProps.SECTION })
         }      
-        else if (incomingProps.ITEM === 'SECTION_ADDITION_FAILED' || incomingProps.ITEM === 'SECTION_EXISTS' || incomingProps.ITEM === 'SECTION_ADDED') {
+        else if (incomingProps.SECTION === 'SECTION_ADDITION_FAILED' || incomingProps.SECTION === 'SECTION_EXISTS' || incomingProps.SECTION === 'SECTION_ADDED') {
             console.log(`inside else if #############`);
-            this.setState({ addResponseMsg: incomingProps.ITEM })
+            this.setState({ addResponseMsg: incomingProps.SECTION })
         }    
-        else if (incomingProps.ITEM === 'SECTION_DELETED_SUCCESSFULLY' || incomingProps.ITEM === 'DELETION_FAILED'|| incomingProps.ITEM === 'SECTION_DOES_NOT_EXISTS' ) {
+        else if (incomingProps.SECTION === 'SECTION_DELETED_SUCCESSFULLY' || incomingProps.SECTION === 'DELETION_FAILED'|| incomingProps.SECTION === 'SECTION_DOES_NOT_EXISTS' ) {
             console.log(`inside else if of delete#############`);
-            this.setState({ deleteResponseMsg: incomingProps.ITEM })
+            this.setState({ deleteResponseMsg: incomingProps.SECTION })
         }
         else {
             console.log(`****-----SOME PROPS NOT MATCHING ANYTHING-----*****`);

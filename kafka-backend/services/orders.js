@@ -24,7 +24,7 @@ function handle_request(msg, callback) {
         console.log(`*****----FFFF-----*******`);
         console.log(msg.user_id);
         // , "order_status": "ORDER_CANCELED" || "ORDER_COMPLETED"
-        orderModel.find({ "customer.customer_id": msg.user_id, "order_status": {$ne : "PLACED"} }, (err, order) => {
+        orderModel.find({ "customer.customer_id": msg.user_id, "order_status": {$ne : "ORDER_PLACED"} }, (err, order) => {
             if (err) {
                 callback(err, "NO_PAST_ORDERS");
             } else if (order) {
