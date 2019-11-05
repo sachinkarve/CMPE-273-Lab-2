@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Form, Modal,Alert,ListGroup,InputGroup, FormControl, Button } from "react-bootstrap";
+import { Form, Modal, Alert, ListGroup, InputGroup, FormControl, Button } from "react-bootstrap";
 import URL from '../config'
+
+
+import propTypes from 'prop-types'
+import { connect } from 'react-redux';
+import { sendMsgAction, getMsgAction } from '../actions/messagingAction'
+
 
 class MessageModal extends Component {
     constructor(props) {
@@ -11,7 +17,7 @@ class MessageModal extends Component {
             visibility: false,
             messageText: '',
             messages: [],
-            x:""
+            x: ""
         };
 
         this.handleClose = this.handleClose.bind(this);
@@ -21,6 +27,23 @@ class MessageModal extends Component {
         this.getMessage = this.getMessage.bind(this);
     }
 
+
+    componentWillReceiveProps(incomingProps) {
+        console.log(`****-----props came in with items----****`);
+        console.log(incomingProps.MESSAGE);
+        if (incomingProps.MESSAGE) {
+
+            this.setState({
+                messageText: "",
+            });
+            this.getMessage();
+        }
+    }
+
+
+
+
+
     onChangeHandler = (e) => {
         this.setState({
             [e.target.name]: e.target.value
@@ -29,6 +52,7 @@ class MessageModal extends Component {
 
     getMessage = () => {
         console.log(`****-----inside get method------*****`);
+        //this.props.getMsgAction(this.props.order._id);
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
         axios.get(`${URL}/messaging/get/${this.props.order._id}`)
             .then(response => {
@@ -61,27 +85,27 @@ class MessageModal extends Component {
             messageText: this.state.message
         }
         console.log(data);
+        this.props.sendMsgAction(data)
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
+        // axios.post(`${URL}/messaging/send`, data)
+        //     .then(response => {
+        //         if (response.data) {
+        //             this.setState({
+        //                 messageText : "",
+        //                 // messages: response.data.messages,
+        //                 visibility: true,
+        //             });
+        //             this.getMessage();
 
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token')
-        axios.post(`${URL}/messaging/send`, data)
-            .then(response => {
-                if (response.data) {
-                    this.setState({
-                        messageText : "",
-                        // messages: response.data.messages,
-                        visibility: true,
-                    });
-                    this.getMessage();
-
-                    console.log(`****----response.data--*******`);
-                    console.log(response.data);
-                }
-            })
-            .catch(err => {
-                if (err.response && err.response.data) {
-                    console.log(err);
-                }
-            });
+        //             console.log(`****----response.data--*******`);
+        //             console.log(response.data);
+        //         }
+        //     })
+        //     .catch(err => {
+        //         if (err.response && err.response.data) {
+        //             console.log(err);
+        //         }
+        //     });
     }
 
     handleShow = () => {
@@ -99,14 +123,14 @@ class MessageModal extends Component {
         let msg = this.state.messages.map(msg => {
             return (
                 <div><h6>
-                      <ListGroup.Item>
-                      <Alert variant="light">
-                      {msg.sender_name}: {msg.messageText}</Alert>
+                    <ListGroup.Item>
+                        <Alert variant="light">
+                            {msg.sender_name}: {msg.messageText}</Alert>
                     </ListGroup.Item>
-                    </h6></div>
+                </h6></div>
             )
         })
-        
+
         return (
             <div>
                 <Button variant="primary" onClick={this.handleShow}>
@@ -119,15 +143,15 @@ class MessageModal extends Component {
                     </Modal.Header>
                     <Modal.Body><ul>{msg}</ul></Modal.Body>
 
-<div>
-                    <input type="text"
-                                                    class="form-control"
-                                                    onChange={this.onChangeHandler}
-                                                    name="message"
-                                                    required={true}
-                                                    placeholder="new one"
-                                                />
-</div>
+                    <div>
+                        <input type="text"
+                            class="form-control"
+                            onChange={this.onChangeHandler}
+                            name="message"
+                            required={true}
+                            placeholder="new one"
+                        />
+                    </div>
 
 
 
@@ -143,4 +167,14 @@ class MessageModal extends Component {
     }
 }
 
-export default MessageModal;
+
+MessageModal.propTypes = {
+    placeOrderActions: propTypes.func.isRequired,
+    MESSAGE: propTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+    MESSAGE: state.messagingReducer.msgState
+})
+
+export default connect(mapStateToProps, { sendMsgAction })(MessageModal)

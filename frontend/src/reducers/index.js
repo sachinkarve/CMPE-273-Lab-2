@@ -7,7 +7,7 @@ import ordersReducer from './ordersReducer'
 import sectionReducer from './sectionReducer';
 import itemReducer from './itemReducer';
 // import orderReducer from './orderReducer';
-// import messageReducer from './messageReducer';
+ import messagingReducer from './messagingReducer';
 
 export default combineReducers({
     loginReducer: loginReducer,
@@ -15,6 +15,7 @@ export default combineReducers({
     ordersReducer : ordersReducer,
     // profile: profileReducer,
     // restaurant: restaurantReducer,
+    messagingReducer : messagingReducer,
     sectionReducer: sectionReducer,
     itemReducer: itemReducer,
     // order: orderReducer,

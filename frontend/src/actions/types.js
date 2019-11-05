@@ -16,4 +16,6 @@ export const PLACEORDER = 'PLACEORDER';
 
 export const RESTAURANTSEARCH = 'RESTAURANTSEARCH';
 
+export const SENDMSG  = 'SENDMSG';
+export const GETMSG = 'GETMSG';
 
