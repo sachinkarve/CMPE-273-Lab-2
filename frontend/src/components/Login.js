@@ -4,6 +4,10 @@ import { Redirect } from 'react-router';
 import { Link } from 'react-router-dom'
 import GrubhubCover from '../images/grubhub.png'
 import URL from '../config'
+import { connect } from 'react-redux';
+
+import propTypes from 'prop-types'
+import { loginAction } from '../actions/loginAction'
 
 import { Alert, Form, Row, Col, Button } from 'react-bootstrap';
 var jwt_decode = require('jwt-decode');
@@ -15,18 +19,45 @@ class Login extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            name : "",
-            user_id : "",
+            name: "",
+            user_id: "",
             email_id: "",
             password: "",
             errorFlag: "",
             is_owner: "",
-            token : null
+            token: null
         }
         this.onChangeHandler = this.onChangeHandler.bind(this);
     }
 
-    
+
+
+    componentWillReceiveProps(incomingProps) {
+        console.log(`****-----props came in with items----****`);
+        console.log(incomingProps.LOGIN);
+
+        if (incomingProps.LOGIN === 'ERROR') {
+            this.setState({
+                errorFlag: true,
+                token: null
+            })
+        }
+        else {
+            this.setState({
+                errorFlag: null,
+                token: incomingProps.LOGIN
+            })
+        }
+    }
+
+
+
+
+
+
+
+
+
     onChangeHandler = (e) => {
         this.setState({
             [e.target.name]: e.target.value
@@ -41,21 +72,22 @@ class Login extends Component {
             email_id: this.state.email_id,
             password: this.state.password
         }
-        axios.defaults.withCredentials = true;
-        axios.post(`${URL}/login`, data)
-            .then(response => {
-                this.setState({
-                    errorFlag: null,
-                    token : response.data.token
-                 });
+        // axios.defaults.withCredentials = true;
+        // axios.post(`${URL}/login`, data)
+        //     .then(response => {
+        //         this.setState({
+        //             errorFlag: null,
+        //             token : response.data.token
+        //          });
 
-            }).catch(err => {
-                console.log(`inside 401`);
-                this.setState({
-                    errorFlag: true,
-                    token : null
-                });
-            });
+        //     }).catch(err => {
+        //         console.log(`inside 401`);
+        //         this.setState({
+        //             errorFlag: true,
+        //             token : null
+        //         });
+        //     });
+        this.props.loginAction(data);
     }
 
     render() {
@@ -81,35 +113,45 @@ class Login extends Component {
         return (
             <div>
                 {redirectVar}
-                    <Row>
-                        <Col><img src={GrubhubCover} alt="not found"></img></Col>
-                        <Col><br />
-                            <Form onSubmit={this.submitLogin}>
-                                <Form.Group controlId="formBasicEmail">
-                                    <Form.Label>Email address</Form.Label>
-                                    <Form.Control autoFocus={true} required={true} type="email" name="email_id" onChange={this.onChangeHandler} placeholder="Enter email" />
-                                    <Form.Text className="text-muted">
-                                        Your email is safe with us.
+                <Row>
+                    <Col><img src={GrubhubCover} alt="not found"></img></Col>
+                    <Col><br />
+                        <Form onSubmit={this.submitLogin}>
+                            <Form.Group controlId="formBasicEmail">
+                                <Form.Label>Email address</Form.Label>
+                                <Form.Control autoFocus={true} required={true} type="email" name="email_id" onChange={this.onChangeHandler} placeholder="Enter email" />
+                                <Form.Text className="text-muted">
+                                    Your email is safe with us.
                                     </Form.Text>
-                                </Form.Group>
+                            </Form.Group>
 
-                                <Form.Group controlId="formBasicPassword">
-                                    <Form.Label>Password</Form.Label>
-                                    <Form.Control type="password" name="password" required={true} onChange={this.onChangeHandler} placeholder="Enter password" />
-                                </Form.Group>
-                                {invalidCredentials}
+                            <Form.Group controlId="formBasicPassword">
+                                <Form.Label>Password</Form.Label>
+                                <Form.Control type="password" name="password" required={true} onChange={this.onChangeHandler} placeholder="Enter password" />
+                            </Form.Group>
+                            {invalidCredentials}
 
-                                <Button variant="primary" type="submit">
-                                    Submit
-                                </Button> 
-                                <Link to="/customersignup"><Button variant="link">Customer Signup</Button></Link>
-                                <Link to="/ownersignup"><Button variant="link">Owner Signup</Button></Link>
-                            </Form>
-                        </Col>
-                    </Row>
+                            <Button variant="primary" type="submit">
+                                Submit
+                                </Button>
+                            <Link to="/customersignup"><Button variant="link">Customer Signup</Button></Link>
+                            <Link to="/ownersignup"><Button variant="link">Owner Signup</Button></Link>
+                        </Form>
+                    </Col>
+                </Row>
             </div>
         )
     }
 }
-//export Login Component
-export default Login
+
+Login.propTypes = {
+    loginAction: propTypes.func.isRequired,
+    LOGIN: propTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+    LOGIN: state.loginReducer.loginState
+})
+
+
+export default connect(mapStateToProps, { loginAction })(Login)

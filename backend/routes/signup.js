@@ -17,21 +17,16 @@ router.post('/customer', (req, res)=> {
   console.log(`****----sachin------******`);
   console.log(req.body);
   req.body.originalUrl = req.originalUrl;
-  kafka.make_request('singup', req.body, function (err, results) {
-    console.log(`*******------2-------******`);
-    console.log('in result');
-    console.log(results);
-    console.log('in errrrrrrr');
-    console.log(err);
-    console.log(`*******------3-------******`);
+  kafka.make_request('signup', req.body, function (err, results) {
+    
     if (err) {
-      console.log("Inside err");
+      console.log("ERROR BELOW");
       console.log(err);
       res.status(500).send(err);
 
     } else {
       console.log(`*******------4-------******`);
-      console.log("Inside else");
+      console.log("RESULTS BELOW");
       console.log(results);
       res.status(200).send(results)
     }

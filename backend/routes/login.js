@@ -27,7 +27,7 @@ router.post('/', function (req, res) {
     if (err) {
       console.log("Inside err");
       console.log(err);
-      res.status(500).send(err);
+      res.status(500).send("PASSWORD_INCORRECT_NO_USER_FOUND");
     } else {
       console.log(`*******------4-------******`);
       console.log("Inside else");

@@ -19,7 +19,7 @@ function ConnectionProvider() {
 
     //Code will be executed when we start Producer
     this.getProducer = function() {
-        console.log(`*******------21-------******`);
+       // console.log(`*******------21-------******`);
 
         if (!this.kafkaProducerConnection) {
             this.client = new kafka.Client("localhost:2181");
@@ -33,7 +33,7 @@ function ConnectionProvider() {
             var HighLevelProducer = kafka.HighLevelProducer;
             this.kafkaProducerConnection = new HighLevelProducer(this.client);
             //this.kafkaConnection = new kafka.Producer(this.client);
-            console.log('producer ready');
+            //console.log('producer ready');
         }
         //console.log(`*******------23-------******`);
 

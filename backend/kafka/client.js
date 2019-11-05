@@ -14,7 +14,7 @@ function make_request(queue_name, msg_payload, callback){
 		else{
 			//console.log(`*******------7-------******`);
 
-			console.log("response", response);
+			//console.log("response", response);
 			callback(null, response);
 		}
 	});

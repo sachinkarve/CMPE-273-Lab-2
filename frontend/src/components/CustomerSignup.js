@@ -6,6 +6,11 @@ import GrubhubCover from '../images/grubhub.png'
 import { Form, Alert, Col, Row, Button } from 'react-bootstrap';
 import URL from '../config'
 
+import propTypes from 'prop-types'
+import { connect } from 'react-redux';
+import { signupCustomerAction } from '../actions/signupAction'
+
+
 class CustomerSignup extends Component {
     constructor(props) {
         super(props);
@@ -19,6 +24,23 @@ class CustomerSignup extends Component {
         }
         this.onChangeHandler = this.onChangeHandler.bind(this);
     }
+
+
+
+    componentWillReceiveProps(incomingProps) {
+        console.log(`****-----props came in with items----****`);
+        console.log(incomingProps);
+
+        if (incomingProps.SIGNUP == 1 || incomingProps.SIGNUP == 0 ) {
+            console.log(`inside if #############`);
+            this.setState({ authFlag : incomingProps.SIGNUP })
+        }
+        else {
+            console.log(`****-----SOME PROPS NOT MATCHING ANYTHING-----*****`);
+            console.log(incomingProps);
+        }
+    }
+
 
     onChangeHandler = (e) => {
         this.setState({
@@ -37,24 +59,25 @@ class CustomerSignup extends Component {
             address: this.state.address,
             is_owner: this.state.is_owner
         }
+        console.log(`next is signupCustomerAction`);
+        this.props.signupCustomerAction(data);
+        // axios.defaults.withCredentials = true;
+        // axios.defaults.headers.common['authorization']= localStorage.getItem('token')
+        // axios.post(`${URL}/signup/customer`, data)
+        //     .then(response => {
+        //         console.log(`data saved`);
+        //         console.log("Status Code : ", response.status);
 
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
-        axios.post(`${URL}/signup/customer`, data)
-            .then(response => {
-                console.log(`data saved`);
-                console.log("Status Code : ", response.status);
-
-                this.setState({
-                    authFlag: true
-                })
-            })
-            .catch(err => {
-                console.log(`data not saved`);
-                this.setState({
-                    authFlag: false
-                });
-            });
+        //         this.setState({
+        //             authFlag: true
+        //         })
+        //     })
+        //     .catch(err => {
+        //         console.log(`data not saved`);
+        //         this.setState({
+        //             authFlag: false
+        //         });
+        //     });
     }
 
     render() {
@@ -116,10 +139,20 @@ class CustomerSignup extends Component {
                             </Form>
                         </Col>
                     </Row>
-                
             </div>
         )
     }
 }
+
+
+CustomerSignup.propTypes = {
+    signupCustomerAction: propTypes.func.isRequired,
+    SIGNUP: propTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+    SIGNUP: state.signupReducer.signupState
+})
+
+export default connect(mapStateToProps, { signupCustomerAction })(CustomerSignup)
 //export Login Component
-export default CustomerSignup

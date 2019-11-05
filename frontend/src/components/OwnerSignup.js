@@ -6,6 +6,9 @@ import GrubhubCover from '../images/grubhub.png'
 import { Form, Alert, Col, Row, Button } from 'react-bootstrap';
 import URL from '../config'
 
+import propTypes from 'prop-types'
+import { connect } from 'react-redux';
+import { signupOwnerAction } from '../actions/signupAction'
 
 class OwnerSignup extends Component {
     constructor(props) {
@@ -23,6 +26,22 @@ class OwnerSignup extends Component {
         }
         this.onChangeHandler = this.onChangeHandler.bind(this);
     }
+
+
+    componentWillReceiveProps(incomingProps) {
+        console.log(`****-----props came in with items----****`);
+        console.log(incomingProps);
+
+        if (incomingProps.SIGNUP == 1 || incomingProps.SIGNUP == 0 ) {
+            console.log(`inside if #############`);
+            this.setState({ authFlag : incomingProps.SIGNUP })
+        }
+        else {
+            console.log(`****-----SOME PROPS NOT MATCHING ANYTHING-----*****`);
+            console.log(incomingProps);
+        }
+    }
+
 
     onChangeHandler = (e) => {
         this.setState({
@@ -43,25 +62,25 @@ class OwnerSignup extends Component {
             res_zip_code: this.state.res_zip_code,
             address: this.state.address,
         }
+        this.props.signupOwnerAction(data);
+        // axios.defaults.withCredentials = true;
+        // axios.defaults.headers.common['authorization']= localStorage.getItem('token')
+        // axios.post(`${URL}/signup/owner`, data)
+        //     .then(response => {
+        //         console.log(`data saved`);
+        //         console.log("Status Code : ", response.status);
 
-        axios.defaults.withCredentials = true;
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token')
-        axios.post(`${URL}/signup/owner`, data)
-            .then(response => {
-                console.log(`data saved`);
-                console.log("Status Code : ", response.status);
-
-                this.setState({
-                    authFlag: true
-                })
-            })
-            .catch(err => {
-                console.log(`data not saved`);
-                console.log(err);
-                this.setState({
-                    authFlag: false
-                });
-            });
+        //         this.setState({
+        //             authFlag: true
+        //         })
+        //     })
+        //     .catch(err => {
+        //         console.log(`data not saved`);
+        //         console.log(err);
+        //         this.setState({
+        //             authFlag: false
+        //         });
+        //     });
     }
 
     render() {
@@ -80,76 +99,87 @@ class OwnerSignup extends Component {
         return (
             <div>
                 {redirectVar}
-                    <Row>
-                        <Col><img src={GrubhubCover} alt="not found"></img></Col>
-                        <Col><br />
-                            <Form onSubmit={this.submitHandler} >
-                                <Form.Row>
-                                    <Form.Group controlId="name">
-                                        <Form.Label>Name</Form.Label>
-                                        <Form.Control autoFocus={true} required={true} onChange={this.onChangeHandler} name="name" placeholder="John Snow" />
-                                    </Form.Group>
-                                </Form.Row>
+                <Row>
+                    <Col><img src={GrubhubCover} alt="not found"></img></Col>
+                    <Col><br />
+                        <Form onSubmit={this.submitHandler} >
+                            <Form.Row>
+                                <Form.Group controlId="name">
+                                    <Form.Label>Name</Form.Label>
+                                    <Form.Control autoFocus={true} required={true} onChange={this.onChangeHandler} name="name" placeholder="John Snow" />
+                                </Form.Group>
+                            </Form.Row>
 
-                                <Form.Row>
-                                    <Form.Group as={Col} controlId="email">
-                                        <Form.Label>Email</Form.Label>
-                                        <Form.Control onChange={this.onChangeHandler} required={true} type="email" name="email_id" placeholder="you@sjsu.edu" />
-                                    </Form.Group>
+                            <Form.Row>
+                                <Form.Group as={Col} controlId="email">
+                                    <Form.Label>Email</Form.Label>
+                                    <Form.Control onChange={this.onChangeHandler} required={true} type="email" name="email_id" placeholder="you@sjsu.edu" />
+                                </Form.Group>
 
-                                    <Form.Group as={Col} controlId="RB.password">
-                                        <Form.Label>Password</Form.Label>
-                                        <Form.Control onChange={this.onChangeHandler} required={true} type="password" name="password" placeholder="Password" />
-                                    </Form.Group>
-                                </Form.Row>
+                                <Form.Group as={Col} controlId="RB.password">
+                                    <Form.Label>Password</Form.Label>
+                                    <Form.Control onChange={this.onChangeHandler} required={true} type="password" name="password" placeholder="Password" />
+                                </Form.Group>
+                            </Form.Row>
 
-                                <Form.Row>
-                                    <Form.Group as={Col} controlId="email">
-                                        <Form.Label>Restaurant Name</Form.Label>
-                                        <Form.Control onChange={this.onChangeHandler} required={true} type="text" name="res_name" placeholder="Inchins" />
-                                    </Form.Group>
-                                </Form.Row>
-                                <Form.Row>
-                                    <Form.Group as={Col} controlId="RB.password">
-                                        <Form.Label>Restaurant Cuisine</Form.Label>
-                                        <Form.Control onChange={this.onChangeHandler} required={true} type="text" name="res_cuisine" placeholder="Ethiopian" />
-                                    </Form.Group>
-                                </Form.Row>
-
-
-                                <Form.Row>
-                                    <Form.Group as={Col} controlId="formGridCity">
-                                        <Form.Label>Address</Form.Label>
-                                        <Form.Control name="address" onChange={this.onChangeHandler} required={true} placeholder="1 Washington square" />
-                                    </Form.Group>
-                                </Form.Row>
-                                <Form.Row>
-                                    <Form.Group as={Col} controlId="formGridCity">
-                                        <Form.Label>Phone</Form.Label>
-                                        <Form.Control name="phone_number" onChange={this.onChangeHandler} required={true} placeholder="9845566878" />
-                                    </Form.Group>
-                                </Form.Row>
-                                <Form.Row>
-                                    <Form.Group as={Col} controlId="formGridZip">
-                                        <Form.Label>Zip</Form.Label>
-                                        <Form.Control name="res_zip_code" type="text" onChange={this.onChangeHandler} required={true} placeholder="900000" />
-                                    </Form.Group>
-                                </Form.Row>
-                                {invalidCredentials}
+                            <Form.Row>
+                                <Form.Group as={Col} controlId="email">
+                                    <Form.Label>Restaurant Name</Form.Label>
+                                    <Form.Control onChange={this.onChangeHandler} required={true} type="text" name="res_name" placeholder="Inchins" />
+                                </Form.Group>
+                            </Form.Row>
+                            <Form.Row>
+                                <Form.Group as={Col} controlId="RB.password">
+                                    <Form.Label>Restaurant Cuisine</Form.Label>
+                                    <Form.Control onChange={this.onChangeHandler} required={true} type="text" name="res_cuisine" placeholder="Ethiopian" />
+                                </Form.Group>
+                            </Form.Row>
 
 
-                                <Button variant="primary" type="submit">
-                                    Submit
+                            <Form.Row>
+                                <Form.Group as={Col} controlId="formGridCity">
+                                    <Form.Label>Address</Form.Label>
+                                    <Form.Control name="address" onChange={this.onChangeHandler} required={true} placeholder="1 Washington square" />
+                                </Form.Group>
+                            </Form.Row>
+                            <Form.Row>
+                                <Form.Group as={Col} controlId="formGridCity">
+                                    <Form.Label>Phone</Form.Label>
+                                    <Form.Control name="phone_number" onChange={this.onChangeHandler} required={true} placeholder="9845566878" />
+                                </Form.Group>
+                            </Form.Row>
+                            <Form.Row>
+                                <Form.Group as={Col} controlId="formGridZip">
+                                    <Form.Label>Zip</Form.Label>
+                                    <Form.Control name="res_zip_code" type="text" onChange={this.onChangeHandler} required={true} placeholder="900000" />
+                                </Form.Group>
+                            </Form.Row>
+                            {invalidCredentials}
+
+
+                            <Button variant="primary" type="submit">
+                                Submit
                                 </Button>
-                                <Link to="/login"><Button variant="link">Login</Button></Link>
-                                <Link to="/customersignup"><Button variant="link">Customer Signup</Button></Link>
+                            <Link to="/login"><Button variant="link">Login</Button></Link>
+                            <Link to="/customersignup"><Button variant="link">Customer Signup</Button></Link>
 
-                            </Form>
-                        </Col>
-                    </Row>
+                        </Form>
+                    </Col>
+                </Row>
             </div>
         )
     }
 }
 //export Login Component
-export default OwnerSignup
+
+OwnerSignup.propTypes = {
+    signupOwnerAction: propTypes.func.isRequired,
+    SIGNUP: propTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+    SIGNUP: state.signupReducer.ownerSignupState
+})
+
+export default connect(mapStateToProps, { signupOwnerAction })(OwnerSignup)
+//export Login Component

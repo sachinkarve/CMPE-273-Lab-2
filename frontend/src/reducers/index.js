@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 // import profileReducer from './profileReducer'
-// import loginReducer from './loginReducer';
-// import signupReducer from './signupReducer';
+import loginReducer from './loginReducer';
+import signupReducer from './signupReducer';
 // import restaurantReducer from './restaurantReducer';
 import sectionReducer from './sectionReducer';
 import itemReducer from './itemReducer';
@@ -9,8 +9,8 @@ import itemReducer from './itemReducer';
 // import messageReducer from './messageReducer';
 
 export default combineReducers({
-    // login: loginReducer,
-    // signup: signupReducer,
+    loginReducer: loginReducer,
+    signupReducer: signupReducer,
     // profile: profileReducer,
     // restaurant: restaurantReducer,
     sectionReducer: sectionReducer,

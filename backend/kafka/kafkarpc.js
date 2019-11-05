@@ -15,7 +15,6 @@ function KafkaRPC(){
 }
 
 KafkaRPC.prototype.makeRequest = function(topic_name, content, callback){
-	console.log(`*******------8-------******`);
 
     self = this;
     //generate a unique correlation id for this call
@@ -52,7 +51,7 @@ KafkaRPC.prototype.makeRequest = function(topic_name, content, callback){
     self.setupResponseQueue(self.producer,topic_name,function(){
        // console.log(`*******------13-------******`);
 
-        console.log('in response');
+        //console.log('in response');
         //put the request on a topic
 
         var payloads = [
@@ -64,15 +63,15 @@ KafkaRPC.prototype.makeRequest = function(topic_name, content, callback){
         ];
        // console.log(`*******------14-------******`);
 
-        console.log('in response1');
-        console.log(self.producer.ready);
+        // console.log('in response1');
+        // console.log(self.producer.ready);
        // console.log(`*******------15-------******`);
 
         self.producer.send(payloads, function(err, data){
-            console.log('in response2');
+           // console.log('in response2');
             if(err)
                 console.log(err);
-            console.log(data);
+           // console.log(data);
         });
     });
 };
@@ -110,8 +109,8 @@ KafkaRPC.prototype.setupResponseQueue = function(producer,topic_name, next){
         }
     });
     self.response_queue = true;
-    console.log(`*******------19-------******`);
+    // console.log(`*******------19-------******`);
 
-    console.log('returning next');
+    // console.log('returning next');
     return next();
 };

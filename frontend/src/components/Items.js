@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Redirect } from 'react-router';
-import { connect } from 'react-redux';
 import { Link } from 'react-router-dom'
 import Navbar from './Navbar.js'
 import item_placeholder from '../images/item_placeholder.jpg'
 import { Row, Card, Alert, ListGroup, Dropdown, Container, Button, Col } from 'react-bootstrap';
 import URL from '../config'
 import propTypes from 'prop-types'
+import { connect } from 'react-redux';
 import { addItemAction, deleteItemAction, updateItemAction } from '../actions/itemAction'
 
 
