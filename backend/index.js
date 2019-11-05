@@ -1,6 +1,5 @@
 const app = require('./myApp');
 var pool = require('./pool');
-const home = require('./routes/home');
 const messaging = require('./routes/messaging');
 
 const login = require('./routes/login');
@@ -20,7 +19,6 @@ app.use("/orders", order);
 app.use("/menu", menu);
 app.use("/fetchimages", fetchimages);
 app.use("/restaurant", restaurant);
-app.use("/home", home);
 app.use("/section", section);
 app.use("/item", item);
 app.use("/login", login);

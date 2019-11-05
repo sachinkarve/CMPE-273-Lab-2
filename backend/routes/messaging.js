@@ -5,8 +5,7 @@ const passport = require('passport')
 var kafka = require('../kafka/client');
 
 
-
-router.get('/get/:order_id', (req, res) => {
+router.get('/get/:order_id', passport.authenticate('jwt', { session: false }),(req, res) => {
 let params={
     order_id : req.params.order_id
 }
@@ -58,7 +57,7 @@ let params={
 
 
 
-router.post('/send', (req, res) => {
+router.post('/send',passport.authenticate('jwt', { session: false }), (req, res) => {
 
   console.log(`#######------INSIDE_ SEND _MSG--------########`);
 

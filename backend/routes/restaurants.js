@@ -8,7 +8,7 @@ var kafka = require('../kafka/client');
 
 const _ = require('lodash');
 // passport.authenticate('jwt', { session: false })
-router.get('/searchrestaurant/:search_input', (req, res) => {
+router.get('/searchrestaurant/:search_input',passport.authenticate('jwt', { session: false }), (req, res) => {
 
 let params={
   search_input : req.params.search_input,
@@ -84,7 +84,7 @@ let params={
 
 
 
-router.post('/placeorder', (req, res) => {
+router.post('/placeorder',passport.authenticate('jwt', { session: false }), (req, res) => {
 
   req.body.originalUrl = req.originalUrl
 

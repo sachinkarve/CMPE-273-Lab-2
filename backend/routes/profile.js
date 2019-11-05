@@ -8,7 +8,7 @@ var kafka = require('../kafka/client');
 const userModel = require('../db_Schema/user')
 
 //this shows the user profile
-router.post('/userget', (req, res) => {
+router.post('/userget',passport.authenticate('jwt', { session: false }), (req, res) => {
   req.body.originalUrl = req.originalUrl
 
   kafka.make_request('profile', req.body, function (err, results) {
@@ -35,7 +35,7 @@ router.post('/userget', (req, res) => {
   // })
 });
 
-router.post('/restaurantget', (req, res) => {
+router.post('/restaurantget', passport.authenticate('jwt', { session: false }),(req, res) => {
   req.body.originalUrl = req.originalUrl
 
   kafka.make_request('profile', req.body, function (err, results) {
@@ -72,7 +72,7 @@ router.post('/restaurantget', (req, res) => {
 
 
 //
-router.post('/restaurantupdate', (req, res) => {
+router.post('/restaurantupdate',passport.authenticate('jwt', { session: false }), (req, res) => {
   req.body.originalUrl = req.originalUrl
   kafka.make_request('profile', req.body, function (err, results) {
     
@@ -136,7 +136,7 @@ router.post('/restaurantupdate', (req, res) => {
 
 
 //
-router.post('/customerupdate', (req, res) => {
+router.post('/customerupdate',passport.authenticate('jwt', { session: false }), (req, res) => {
 
   req.body.originalUrl = req.originalUrl
 

@@ -9,6 +9,7 @@ var LoginService = require('./services/login.js');
 var MessagingService = require('./services/ordersmessaging.js');
 var OrdersService = require('./services/orders.js');
 var MenuService = require('./services/menu.js');
+var passportService = require('./services/passport.js');
 
 var SignupService = require('./services/signup.js');
 var ProfileService = require('./services/profile.js');
@@ -69,5 +70,5 @@ handleTopicRequest("profile",ProfileService)
 handleTopicRequest("restaurants",RestaurantService)
 handleTopicRequest("sections",SectionService)
 handleTopicRequest("menu",MenuService)
-
+handleTopicRequest("passport", passportService);
 //handleTopicRequest("post_book",Books)

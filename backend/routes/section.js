@@ -9,7 +9,7 @@ var kafka = require('../kafka/client');
 
 
 
-router.post('/editsection', (req, res) => {
+router.post('/editsection', passport.authenticate('jwt', { session: false }),(req, res) => {
 
 
   console.log(`****----sachin------******`);
@@ -74,7 +74,7 @@ router.post('/editsection', (req, res) => {
 });
 
 
-router.get("/:user_id", (req, res) => {
+router.get("/:user_id",passport.authenticate('jwt', { session: false }), (req, res) => {
 
 
 
@@ -121,7 +121,7 @@ router.get("/:user_id", (req, res) => {
 
 
 //this shows the user profile
-router.post('/addsection',  (req, res) => {
+router.post('/addsection',  passport.authenticate('jwt', { session: false }),(req, res) => {
 
 
   //passport.authenticate('jwt', { session: false }),
@@ -191,7 +191,7 @@ router.post('/addsection',  (req, res) => {
 
 
 //this shows the user profile
-router.post('/deletesection', (req, res) => {
+router.post('/deletesection',passport.authenticate('jwt', { session: false }), (req, res) => {
 
 
   console.log(`****----sachin------******`);

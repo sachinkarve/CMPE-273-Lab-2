@@ -4,10 +4,11 @@ const pool = require('../pool')
 const passwordHash = require('password-hash');
 const userModel = require('../db_Schema/user')
 var kafka = require('../kafka/client');
+const passport = require('passport')
 
 
 //this shows the user profile
-router.post('/additem', (req, res) => {
+router.post('/additem',passport.authenticate('jwt', { session: false }), (req, res) => {
   console.log(`****----sachin------******`);
   console.log(req.body);
   req.body.originalUrl = req.originalUrl;
