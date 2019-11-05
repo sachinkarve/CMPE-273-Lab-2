@@ -13,6 +13,8 @@ import CustomerProfile from './CustomerProfile'
 import Landing from './Landing'
 import URL from '../config'
 
+//redux not required for now
+
 class CurrentOrders extends Component {
     render() {
         return (

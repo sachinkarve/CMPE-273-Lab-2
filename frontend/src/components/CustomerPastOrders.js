@@ -6,6 +6,8 @@ import Navbar from './Navbar';
 import URL from '../config'
 import Draggable from 'react-draggable'
 
+//redux not required its just a get for now
+
 class CustomerPastOrders extends Component {
     constructor(props) {
         super(props);

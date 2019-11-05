@@ -5,6 +5,10 @@ import Navbar from './Navbar.js';
 import axios from 'axios';
 import URL from '../config'
 
+import propTypes from 'prop-types'
+import { connect } from 'react-redux';
+import { placeOrderActions } from '../actions/ordersAction'
+
 class ConfirmOrder extends Component {
     constructor(props) {
         super(props);
@@ -23,6 +27,29 @@ class ConfirmOrder extends Component {
             });
         }
     };
+
+
+    componentWillReceiveProps(incomingProps) {
+        console.log(`****-----props came in with items----****`);
+        console.log(incomingProps.ORDER);
+
+        if (incomingProps.ORDER === 'ORDER_PLACED'  ) {
+            console.log(`inside if #############`);
+            this.setState({ message: incomingProps.ORDER  })
+            localStorage.removeItem("cart_items");
+            localStorage.removeItem("cart_res_id");
+        }
+        else {
+            console.log(`****-----SOME PROPS NOT MATCHING ANYTHING-----*****`);
+            console.log(incomingProps);
+            this.setState({ message: "ORDER_ERROR"  })
+
+        }
+    }
+
+
+
+
 
     getUserProfile = () => {
         axios.defaults.headers.common['authorization']= localStorage.getItem('token') 
@@ -55,22 +82,23 @@ class ConfirmOrder extends Component {
             total: this.state.total,
             cart_items: this.state.cart_items
         }
-        axios.defaults.headers.common['authorization']= localStorage.getItem('token') 
-        axios.post(`${URL}/restaurant/placeorder`, data)
-            .then(response => {
-                if (response.data === "ORDER_PLACED") {
-                    localStorage.removeItem("cart_items");
-                    localStorage.removeItem("cart_res_id");
-                    this.setState({
-                        message: response.data
-                    });
-                }
-            })
-            .catch(error => {
-                this.setState({
-                    message: "ORDER_ERROR"
-                });
-            });
+        this.props.placeOrderActions(data);
+        // axios.defaults.headers.common['authorization']= localStorage.getItem('token') 
+        // axios.post(`${URL}/restaurant/placeorder`, data)
+        //     .then(response => {
+        //         if (response.data === "ORDER_PLACED") {
+        //             localStorage.removeItem("cart_items");
+        //             localStorage.removeItem("cart_res_id");
+        //             this.setState({
+        //                 message: response.data
+        //             });
+        //         }
+        //     })
+        //     .catch(error => {
+        //         this.setState({
+        //             message: "ORDER_ERROR"
+        //         });
+        //     });
     };
 
     render() {
@@ -144,4 +172,14 @@ class ConfirmOrder extends Component {
         )
     }
 }
-export default ConfirmOrder;
+
+ConfirmOrder.propTypes = {
+    placeOrderActions : propTypes.func.isRequired,
+    ORDER: propTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+    ORDER: state.ordersReducer.orderState
+})
+
+export default connect(mapStateToProps, { placeOrderActions })(ConfirmOrder)

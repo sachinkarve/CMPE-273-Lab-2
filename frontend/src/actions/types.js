@@ -12,3 +12,8 @@ export const SIGNUP = 'SIGNUP';
 
 export const OWNERSIGNUP = 'OWNERSIGNUP';
 
+export const PLACEORDER = 'PLACEORDER';
+
+export const RESTAURANTSEARCH = 'RESTAURANTSEARCH';
+
+
