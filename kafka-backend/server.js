@@ -19,7 +19,7 @@ var RestaurantService = require('./services/restaurants.js');
 
 
 const mongoose = require('mongoose'); 
-mongoose.connect(config.URL, { useNewUrlParser: true, useUnifiedTopology: true },(err,res)=>{
+mongoose.connect(config.URL, { useNewUrlParser: true, poolSize: 500,useUnifiedTopology: true },(err,res)=>{
     if(err){
       console.log(`MongoDB Connection Failed::: ${err}`);
     }else{
